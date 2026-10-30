@@ -7,22 +7,11 @@ import jakarta.persistence.*;
 public class CurrencyEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String sourceCurrency;
     private String targetCurrency;
     private Double conversionRate;
-
-    public CurrencyEntity() {
-    }
-
-    public CurrencyEntity(Long id, String sourceCurrency, String targetCurrency, Double conversionRate) {
-        this.id = id;
-        this.sourceCurrency = sourceCurrency;
-        this.targetCurrency = targetCurrency;
-        this.conversionRate = conversionRate;
-    }
 
     public Long getId() {
         return id;
@@ -55,5 +44,4 @@ public class CurrencyEntity {
     public void setConversionRate(Double conversionRate) {
         this.conversionRate = conversionRate;
     }
-
 }

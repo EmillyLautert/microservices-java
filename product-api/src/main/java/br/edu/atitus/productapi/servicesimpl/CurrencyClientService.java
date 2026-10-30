@@ -16,14 +16,13 @@ public class CurrencyClientService {
         this.currencyClient = currencyClient;
     }
 
+    @Retry(name = "currency-api")
+    @CircuitBreaker(name = "currency-api")
     @Cacheable(
             value = "currency-api",
             key = "#source + '-' + #target"
     )
-    @Retry(name = "currency-api")
-    @CircuitBreaker(name = "currency-api")
     public CurrencyResponse getCurrency(String source, String target) {
         return currencyClient.getCurrency(source, target);
     }
-
 }

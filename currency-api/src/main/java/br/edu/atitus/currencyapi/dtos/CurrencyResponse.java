@@ -8,17 +8,4 @@ public record CurrencyResponse(
         Double conversionRate,
         String environment
 ) {
-
-    public static CurrencyResponse fromEntity(
-            CurrencyEntity entity,
-            String environment
-    ) {
-        return new CurrencyResponse(
-                entity.getSourceCurrency(),
-                entity.getTargetCurrency(),
-                entity.getConversionRate(),
-                environment
-        );
-    }
-
 }
