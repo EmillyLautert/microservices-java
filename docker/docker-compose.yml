@@ -1,4 +1,95 @@
 services:
+  # ==========================================================
+  # GRAFANA - OBSERVABILITY DASHBOARDS
+  # ==========================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    depends_on:
+      - prometheus
+      - loki
+      - zipkin
+    restart: unless-stopped
+    networks:
+      - backend
+
+  # ==========================================================
+  # GRAFANA ALLOY - LOG COLLECTION
+  # ==========================================================
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    ports:
+      - "12345:12345"
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - alloy_data:/var/lib/alloy/data
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - backend
+
+  # ==========================================================
+  # LOKI - LOG AGGREGATION
+  # ==========================================================
+  loki:
+    image: grafana/loki:3.7.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+    command:
+      - "-config.file=/etc/loki/config.yaml"
+    restart: unless-stopped
+    networks:
+      - backend
+
+  # ==========================================================
+  # PROMETHEUS - METRICS COLLECTION
+  # ==========================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    restart: unless-stopped
+    networks:
+      - backend
+
+  # ==========================================================
+  # ZIPKIN - DISTRIBUTED TRACING
+  # ==========================================================
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    restart: unless-stopped
+    networks:
+      - backend
+
   consul:
     image: hashicorp/consul:1.21
     container_name: consul
@@ -82,6 +173,27 @@ services:
       - backend
     restart: unless-stopped
 
+  # ==========================================================
+  # BANCO DE DADOS - ORDER API
+  # ==========================================================
+  order-db:
+    image: postgres:17
+    container_name: order-db
+    environment:
+      POSTGRES_DB: db_order
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - order_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d db_order" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+    restart: unless-stopped
+
   product-api:
     build:
       context: ../product-api
@@ -154,11 +266,39 @@ services:
       - backend
     restart: unless-stopped
 
+  # ==========================================================
+  # ORDER API
+  # ==========================================================
+  order-api:
+    build:
+      context: ../order-api
+    container_name: order-api
+    environment:
+      SPRING_CONFIG_IMPORT: "consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+    depends_on:
+      consul-config:
+        condition: service_completed_successfully
+      order-db:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: unless-stopped
+
 networks:
   backend:
     driver: bridge
 
+# ============================================================
+# VOLUMES PERSISTENTES DOS BANCOS
+# ============================================================
 volumes:
   product_data:
   currency_data:
   auth_data:
+  order_data:
+  prometheus_data:
+  loki_data:
+  alloy_data:
+  grafana_data:

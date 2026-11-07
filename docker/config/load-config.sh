@@ -69,6 +69,32 @@ put "config/auth-api/spring.datasource.url" "jdbc:postgresql://auth-db:5432/db_u
 put "config/auth-api/spring.datasource.username" "postgres"
 put "config/auth-api/spring.datasource.password" "postgres"
 
+# ==========================================================
+# ORDER API
+# ==========================================================
+
+put "config/order-api/server.port" "8300"
+
+# Banco de dados
+put "config/order-api/spring.datasource.url" \
+    "jdbc:postgresql://order-db:5432/db_order"
+put "config/order-api/spring.datasource.username" "postgres"
+put "config/order-api/spring.datasource.password" "postgres"
+
+# ==========================================================
+# OBSERVABILIDADE - MÉTRICAS E TRACING
+# ==========================================================
+
+# Identificação das aplicações
+put "config/application/management.prometheus.metrics.export.enabled" "true"
+
+# Tracing
+put "config/application/management.tracing.enabled" "true"
+put "config/application/management.tracing.sampling.probability" "1.0"
+
+# Exportação dos traces para Zipkin
+put "config/application/management.tracing.export.zipkin.endpoint" "http://zipkin:9411/api/v2/spans"
+
 echo "=========================================="
 echo " Configurações carregadas com sucesso!"
 echo "=========================================="
