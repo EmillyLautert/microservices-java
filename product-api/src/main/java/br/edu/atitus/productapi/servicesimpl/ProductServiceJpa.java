@@ -1,107 +1,115 @@
 package br.edu.atitus.productapi.servicesimpl;
 
-import br.edu.atitus.productapi.clients.CurrencyClient;
 import br.edu.atitus.productapi.dtos.ProductRequest;
 import br.edu.atitus.productapi.dtos.ProductResponse;
 import br.edu.atitus.productapi.entities.ProductEntity;
+import br.edu.atitus.productapi.entities.ProductType;
 import br.edu.atitus.productapi.repositories.ProductRepository;
 import br.edu.atitus.productapi.services.ProductService;
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import java.util.List;
 
 @Service
 public class ProductServiceJpa implements ProductService {
-
     private final ProductRepository repository;
-    private final CurrencyClientService currencyClientService;
+    private final KitSelectionStrategy<ProductEntity> kitSelectionStrategy;
 
-    public ProductServiceJpa(ProductRepository repository, CurrencyClientService currencyClientService) {
+    public ProductServiceJpa(ProductRepository repository, KitSelectionStrategy<ProductEntity> kitSelectionStrategy) {
         this.repository = repository;
-        this.currencyClientService = currencyClientService;
+        this.kitSelectionStrategy = kitSelectionStrategy;
     }
 
-    @Value("${server.port:8080}")
-    private String serverPort;
-
-    @Value("${app.promotion.message:Nenhuma Promoção Ativa}")
-    private String promotionMessage;
-
-    private ProductResponse getResponse(ProductEntity entity, String environment, String targetCurrency){
-        double convertedValue = entity.getPrice();
-        if (! entity.getCurrency().equalsIgnoreCase(targetCurrency)) {
-            //Aqui vai fazer a comunicação com o microservice currency-api
-            try {
-                var currency = currencyClientService.getCurrency(
-                        entity.getCurrency(),
-                        targetCurrency
-                );
-                convertedValue = entity.getPrice() * currency.conversionRate();
-                environment += " - " + currency.environment();
-
-            } catch (Exception e) {
-                convertedValue = -1;
-                environment += " - ERROR: " + e.getMessage();
-            }
-
+    @Override
+    public Page<ProductResponse> findAll(String category, ProductType type, String search, Pageable pageable) {
+        Specification<ProductEntity> spec = (root, query, cb) -> cb.conjunction();
+        if (category != null && !category.isBlank())
+            spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("category")), category.trim().toLowerCase()));
+        if (type != null) spec = spec.and((root, query, cb) -> cb.equal(root.get("type"), type));
+        if (search != null && !search.isBlank()) {
+            String term = "%" + search.trim().toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("title")), term),
+                    cb.like(cb.lower(root.get("author")), term)));
         }
-        return ProductResponse.fromEntity(
-                entity,
-                environment,
-                promotionMessage,
-                targetCurrency,
-                convertedValue
-        );
-    }
-
-
-    @Override
-    public ProductResponse findById(Long id, String targetCurrency) throws Exception {
-        var product = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado"));
-        String environment = "Product API running in port " + serverPort;
-
-        return getResponse(product, environment, targetCurrency);
+        Pageable sorted = pageable.getSort().isUnsorted()
+                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("title").ascending())
+                : pageable;
+        return repository.findAll(spec, sorted).map(ProductResponse::fromEntity);
     }
 
     @Override
-    public Page<ProductResponse> findAll(Pageable pageable, String targetCurrency) throws Exception {
-        var products = repository.findAll(pageable);
-        String environment = "Product API running in port " + serverPort;
-
-        return products.map(
-                entity -> getResponse(entity, environment, targetCurrency)
-        );
+    public ProductResponse findById(Long id) {
+        return ProductResponse.fromEntity(getEntity(id));
     }
 
     @Override
-    public ProductEntity save(ProductRequest request) throws Exception {
-        if (request == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requisição inválida");
-        if (request.brand() == null || request.brand().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Marca inválida");
-        if (request.model() == null || request.model().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Modelo inválido");
-        if (request.description() == null || request.description().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Descrição inválida");
-        if (request.price() <= 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Preço inválido");
-        if (request.currency() == null || request.currency().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Moeda inválida");
+    public ProductResponse create(ProductRequest request) {
+        return ProductResponse.fromEntity(repository.save(toEntity(new ProductEntity(), request)));
+    }
 
-        var product = new ProductEntity();
-        product.setBrand(request.brand().trim());
-        product.setModel(request.model().trim());
-        product.setDescription(request.description().trim());
-        product.setPrice(request.price());
-        product.setCurrency(request.currency().trim());
-        product.setImage(request.image() != null ? request.image().trim() : null);
+    @Override
+    public ProductResponse update(Long id, ProductRequest request) {
+        return ProductResponse.fromEntity(repository.save(toEntity(getEntity(id), request)));
+    }
 
-        return repository.save(product);
+    @Override
+    public ProductResponse updateImage(Long id, String imagePath) {
+        ProductEntity product = getEntity(id);
+        product.setImage(imagePath);
+        return ProductResponse.fromEntity(repository.save(product));
+    }
+
+    @Override
+    public void delete(Long id) {
+        ProductEntity entity = getEntity(id);
+        repository.delete(entity);
+    }
+
+    @Override
+    public List<ProductEntity> findKitBooks(Long kitId, int quantity) {
+        ProductEntity kit = getEntity(kitId);
+        if (kit.getType() != ProductType.KIT) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O produto informado não é um kit");
+        List<ProductEntity> candidates = repository.findByCategoryIgnoreCaseAndType(kit.getCategory(), ProductType.BOOK);
+        if (quantity < 1 || kit.getBookCount() == null || quantity > Integer.MAX_VALUE / kit.getBookCount())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade do kit inválida");
+        int required = kit.getBookCount() * quantity;
+        if (candidates.size() < required)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Não há livros suficientes nesta categoria para montar o kit");
+        return kitSelectionStrategy.select(candidates, required);
+    }
+
+    private ProductEntity getEntity(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
+    }
+
+    private ProductEntity toEntity(ProductEntity entity, ProductRequest request) {
+        if (request.type() == ProductType.BOOK && (request.author() == null || request.author().isBlank()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Autor é obrigatório para livros");
+        if (request.type() == ProductType.BOOK && request.bookCount() != null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bookCount deve ser nulo para livros");
+        if (request.type() == ProductType.KIT && (request.bookCount() == null || request.bookCount() < 1))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bookCount deve ser maior que zero para kits");
+        if (request.currency() != null && !"BRL".equalsIgnoreCase(request.currency().trim()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A moeda do catálogo deve ser BRL");
+        if (request.image() != null && !request.image().isBlank()
+                && (!request.image().startsWith("/images/") || request.image().contains("..") || request.image().contains("\\")))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A imagem deve ser enviada pelo endpoint de upload");
+        entity.setTitle(request.title().trim());
+        entity.setAuthor(request.type() == ProductType.BOOK ? request.author().trim() : null);
+        entity.setDescription(request.description().trim());
+        entity.setCategory(request.category().trim());
+        entity.setType(request.type());
+        entity.setBookCount(request.type() == ProductType.KIT ? request.bookCount() : null);
+        entity.setPrice(request.price());
+        entity.setCurrency("BRL");
+        entity.setImage(request.image() == null || request.image().isBlank() ? null : request.image().trim());
+        return entity;
     }
 }

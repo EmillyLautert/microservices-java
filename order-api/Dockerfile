@@ -47,7 +47,7 @@ COPY --from=build --chown=spring:spring \
 USER spring
 
 # Porta interna padrão da aplicação.
-EXPOSE 8080
+EXPOSE 8300
 
 # Executa a aplicação Spring Boot.
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

@@ -7,76 +7,64 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class AuthFilter implements GlobalFilter, Ordered {
-
-    private static final List<String> PROTECTED_ROUTES = List.of("/ws/");
-
-    private static final List<String> USER_HEADERS = List.of("X-User-Id", "X-User-Type", "X-User-Email");
+    private static final List<String> IDENTITY_HEADERS = List.of("X-User-Id", "X-User-Type", "X-User-Email");
+    private final JwtUtil jwtUtil;
+    public AuthFilter(JwtUtil jwtUtil) { this.jwtUtil = jwtUtil; }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest sanitized = exchange.getRequest().mutate()
+                .headers(headers -> IDENTITY_HEADERS.forEach(headers::remove)).build();
+        String path = exchange.getRequest().getURI().getPath();
+        if (!isProtected(path)) return chain.filter(exchange.mutate().request(sanitized).build());
 
-        ServerHttpRequest request = exchange.getRequest();
+        String authorization = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (authorization == null || !authorization.startsWith("Bearer ")) return reject(exchange, HttpStatus.UNAUTHORIZED);
+        Claims claims = jwtUtil.validateToken(authorization.substring(7));
+        if (claims == null) return reject(exchange, HttpStatus.UNAUTHORIZED);
 
-        // Nunca confiar nos cabeçalhos enviados pelo cliente.
-        // Remove todos os cabeçalhos de identidade usados em nosso projeto.
-        ServerHttpRequest sanitizedRequest = request.mutate().headers(headers -> USER_HEADERS.forEach(headers::remove)).build();
+        Object rawId = claims.get("id");
+        Object rawType = claims.get("type");
+        String email = claims.get("email", String.class);
+        if (!(rawId instanceof Number id) || !(rawType instanceof Number type) || email == null)
+            return reject(exchange, HttpStatus.UNAUTHORIZED);
 
-        // Obter a rota solicitada.
-        String path = request.getURI().getPath();
+        boolean sellerRoute = path.startsWith("/ws/");
+        int userType = type.intValue();
+        if ((sellerRoute && userType != 0) || (!sellerRoute && userType != 1))
+            return reject(exchange, HttpStatus.FORBIDDEN);
 
-        // Rotas Públicas: seguem sem identidade propagada.
-        if (PROTECTED_ROUTES.stream().noneMatch(path::startsWith)) {
-            return chain.filter(
-                    exchange.mutate()
-                            .request(sanitizedRequest)
-                            .build());
-        } else { // Rotas Protegidas: validam e propagam identidade.
-            // Verifica a existência do cabeçalho de autorization do tipo Bearer.
-            String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-
-                // Extrai o token JWT do cabeçalho de autorização e valida-o.
-                String jwt = authHeader.substring(7);
-                Claims claims = JwtUtil.validateToken(jwt);
-                if (claims != null) {
-
-                    // Extrai os dados do usuário do token JWT.
-                    Long userId = claims.get("id", Long.class);
-                    Integer userType = claims.get("type", Integer.class);
-                    String email = claims.get("email", String.class);
-
-                    // Não propagar caso identidade esteja incompleta.
-                    if (userId != null && userType != null && email != null) {
-                        ServerHttpRequest authenticatedRequest = sanitizedRequest.mutate().headers(headers -> {
-                            headers.set("X-User-Id", userId.toString());
-                            headers.set("X-User-Type", userType.toString());
-                            headers.set("X-User-Email", email);
-                        }).build();
-
-                        // Prosseguir com a requisição autenticada com cabeçalho identificando o usuário
-                        //   se, e somente se, passou por todas as validações.
-                        return chain.filter(exchange.mutate().request(authenticatedRequest).build());
-                    }
-                }
-            }
-        }
-
-        // Caso alguma validação falhou, retornar resposta de erro.
-        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-        return exchange.getResponse().setComplete();
+        ServerHttpRequest authenticated = sanitized.mutate().headers(headers -> {
+            headers.set("X-User-Id", id.toString());
+            headers.set("X-User-Type", Integer.toString(userType));
+            headers.set("X-User-Email", email);
+        }).build();
+        return chain.filter(exchange.mutate().request(authenticated).build());
     }
 
-    @Override
-    public int getOrder() {
-        return -1;
+    private boolean isProtected(String path) {
+        return path.equals("/orders") || path.startsWith("/orders/") || path.equals("/ws") || path.startsWith("/ws/");
     }
+
+    private Mono<Void> reject(ServerWebExchange exchange, HttpStatus status) {
+        exchange.getResponse().setStatusCode(status);
+        exchange.getResponse().getHeaders().setContentType(MediaType.TEXT_PLAIN);
+        String message = status == HttpStatus.UNAUTHORIZED
+                ? "Token ausente ou inválido"
+                : "Usuário sem permissão para esta operação";
+        var body = exchange.getResponse().bufferFactory().wrap(message.getBytes(StandardCharsets.UTF_8));
+        return exchange.getResponse().writeWith(Mono.just(body));
+    }
+
+    @Override public int getOrder() { return -1; }
 }

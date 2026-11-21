@@ -1,16 +1,6 @@
 package br.edu.atitus.orderapi.dtos;
 
-public record ProductResponse(
-        Long id,
-        String brand,
-        String model,
-        String description,
-        String currency,
-        double price,
-        String image,
+import java.math.BigDecimal;
 
-        String environment,
-        String promotionMessage,
-        String targetCurrency,
-        double convertedPrice
-) {}
+public record ProductResponse(Long id, String title, String author, String description, String category,
+                              String type, Integer bookCount, BigDecimal price, String currency, String image) { }

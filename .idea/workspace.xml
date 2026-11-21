@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="421462a6-1e55-441a-80b7-c9c6e6794730" name="Changes" comment="Atividade Containerização de Microsserviços com Docker">
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/alloy/config.alloy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/loki/loki-config.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker/prometheus/prometheus.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/auth-api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/currency-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/currency-api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/config/load-config.sh" beforeDir="false" afterPath="$PROJECT_DIR$/docker/config/load-config.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateway-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateway-api/src/main/java/br/edu/atitus/gatewayapi/configs/GatewayConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-api/src/main/java/br/edu/atitus/gatewayapi/configs/GatewayConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/pom.xml" afterDir="false" />
-    </list>
+    <list default="true" id="421462a6-1e55-441a-80b7-c9c6e6794730" name="Changes" comment="Atividades Importando e integrando o Order API e Implementando Observabilidade" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -91,6 +78,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Atualização dos códigos" />
     <MESSAGE value="Atividade Containerização de Microsserviços com Docker" />
-    <option name="LAST_COMMIT_MESSAGE" value="Atividade Containerização de Microsserviços com Docker" />
+    <MESSAGE value="Atividades Importando e integrando o Order API e Implementando Observabilidade" />
+    <option name="LAST_COMMIT_MESSAGE" value="Atividades Importando e integrando o Order API e Implementando Observabilidade" />
   </component>
 </project>

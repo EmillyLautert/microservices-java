@@ -1,34 +1,24 @@
 package br.edu.atitus.productapi.dtos;
 
 import br.edu.atitus.productapi.entities.ProductEntity;
+import br.edu.atitus.productapi.entities.ProductType;
+import java.math.BigDecimal;
 
 public record ProductResponse(
         Long id,
-        String brand,
-        String model,
+        String title,
+        String author,
         String description,
+        String category,
+        ProductType type,
+        Integer bookCount,
+        BigDecimal price,
         String currency,
-        double price,
-        String image,
-
-        String environment,
-        String promotionMessage,
-        String targetCurrency,
-        double convertedPrice
+        String image
 ) {
-    public static ProductResponse fromEntity(ProductEntity entity, String environment, String promotionMessage, String targetCurrency, double convertedPrice) {
-        return new ProductResponse(
-                entity.getId(),
-                entity.getDescription(),
-                entity.getBrand(),
-                entity.getModel(),
-                entity.getCurrency(),
-                entity.getPrice(),
-                entity.getImage(),
-                environment,
-                promotionMessage,
-                targetCurrency,
-                convertedPrice
-                );
+    public static ProductResponse fromEntity(ProductEntity entity) {
+        return new ProductResponse(entity.getId(), entity.getTitle(), entity.getAuthor(),
+                entity.getDescription(), entity.getCategory(), entity.getType(),
+                entity.getBookCount(), entity.getPrice(), entity.getCurrency(), entity.getImage());
     }
 }

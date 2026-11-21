@@ -3,40 +3,43 @@ package br.edu.atitus.currencyapi.controllers;
 import br.edu.atitus.currencyapi.dtos.CurrencyResponse;
 import br.edu.atitus.currencyapi.services.CurrencyService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import java.util.Locale;
 
 @RestController
-@RequestMapping("currencies")
+@RequestMapping("/currencies")
 public class CurrencyController {
-
     private final CurrencyService service;
-
-    private int count = 1;
-
-    public CurrencyController(CurrencyService service) {
-        this.service = service;
-    }
+    public CurrencyController(CurrencyService service) { this.service = service; }
 
     @GetMapping
-    public ResponseEntity<CurrencyResponse> getCurrency(
-            @RequestParam String source,
-            @RequestParam String target) throws Exception {
+    public ResponseEntity<CurrencyResponse> getCurrency(@RequestParam String source, @RequestParam String target) throws Exception {
+        String normalizedSource = normalizeCurrency(source, "source");
+        String normalizedTarget = normalizeCurrency(target, "target");
+        return ResponseEntity.ok(service.findBySourceCurrencyAndTargetCurrency(normalizedSource, normalizedTarget));
+    }
 
-//        if (count++ % 2 == 0)
-//            Thread.sleep(5000);
+    private String normalizeCurrency(String currency, String field) {
+        if (currency == null || !currency.trim().matches("(?i)[a-z]{3}"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O parâmetro " + field + " deve conter um código de moeda com 3 letras");
+        return currency.trim().toUpperCase(Locale.ROOT);
+    }
 
-        var currency = service.findBySourceCurrencyAndTargetCurrency(source, target);
-        return ResponseEntity.ok(currency);
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<String> responseStatus(ResponseStatusException exception) {
+        return ResponseEntity.status(exception.getStatusCode()).body(exception.getReason());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> entityNotFoundExceptionHandler(EntityNotFoundException ex) {
-        return ResponseEntity.status(404).body(ex.getMessage());
+    public ResponseEntity<String> notFound(EntityNotFoundException ignored) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cotação não encontrada para as moedas informadas");
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> exceptionHandler(Exception ex) {
-        return ResponseEntity.status(500).body("Ops!!! Algo deu errado. ERROR: " + ex.getMessage());
+    public ResponseEntity<String> unexpected(Exception ignored) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Não foi possível consultar a cotação");
     }
 }

@@ -17,9 +17,7 @@ public class ConfigSecurity {
     SecurityFilterChain getFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/ws**", "/ws/**").authenticated()
-                        .anyRequest().permitAll());
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         return http.build();
     }
 

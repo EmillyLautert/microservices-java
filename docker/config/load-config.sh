@@ -2,6 +2,9 @@
 
 set -eu
 
+: "${POSTGRES_USER:?POSTGRES_USER precisa estar definido no .env}"
+: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD precisa estar definido no .env}"
+
 echo "=========================================="
 echo " Carregando configurações no Consul"
 echo "=========================================="
@@ -16,9 +19,9 @@ put() {
 }
 
 # Configurações gerais
-put "config/application/management.endpoints.web.exposure.include" "*"
-put "config/application/management.endpoint.health.show-components" "always"
-put "config/application/management.endpoint.health.show-details" "always"
+put "config/application/management.endpoints.web.exposure.include" "health,prometheus,info"
+put "config/application/management.endpoint.health.show-components" "never"
+put "config/application/management.endpoint.health.show-details" "never"
 put "config/application/management.health.livenessstate.enabled" "true"
 put "config/application/management.health.readinessstate.enabled" "true"
 put "config/application/management.health.db.enabled" "true"
@@ -26,10 +29,8 @@ put "config/application/management.health.db.enabled" "true"
 # Product API
 put "config/product-api/server.port" "8000"
 put "config/product-api/spring.datasource.url" "jdbc:postgresql://product-db:5432/db_product"
-put "config/product-api/spring.datasource.username" "postgres"
-put "config/product-api/spring.datasource.password" "postgres"
-put "config/product-api/app.promotion.message" "Promoção Semana do Cliente"
-put "config/product-api,en/app.promotion.message" "Christmas Promotion!!!!"
+put "config/product-api/spring.datasource.username" "$POSTGRES_USER"
+put "config/product-api/spring.datasource.password" "$POSTGRES_PASSWORD"
 put "config/product-api/resilience4j.retry.instances.currency-api.max-attempts" "3"
 put "config/product-api/resilience4j.retry.instances.currency-api.wait-duration" "1s"
 put "config/product-api/resilience4j.circuitbreaker.instances.currency-api.sliding-window-type" "COUNT_BASED"
@@ -47,8 +48,8 @@ put "config/product-api/resilience4j.circuitbreaker.circuit-breaker-aspect-order
 # Currency API
 put "config/currency-api/server.port" "8100"
 put "config/currency-api/spring.datasource.url" "jdbc:postgresql://currency-db:5432/db_currency"
-put "config/currency-api/spring.datasource.username" "postgres"
-put "config/currency-api/spring.datasource.password" "postgres"
+put "config/currency-api/spring.datasource.username" "$POSTGRES_USER"
+put "config/currency-api/spring.datasource.password" "$POSTGRES_PASSWORD"
 put "config/currency-api/resilience4j.retry.instances.bcb-currency.max-attempts" "3"
 put "config/currency-api/resilience4j.retry.instances.bcb-currency.wait-duration" "1s"
 put "config/currency-api/resilience4j.circuitbreaker.instances.bcb-currency.sliding-window-type" "COUNT_BASED"
@@ -66,8 +67,8 @@ put "config/currency-api/resilience4j.circuitbreaker.circuit-breaker-aspect-orde
 # Auth API
 put "config/auth-api/server.port" "8200"
 put "config/auth-api/spring.datasource.url" "jdbc:postgresql://auth-db:5432/db_user"
-put "config/auth-api/spring.datasource.username" "postgres"
-put "config/auth-api/spring.datasource.password" "postgres"
+put "config/auth-api/spring.datasource.username" "$POSTGRES_USER"
+put "config/auth-api/spring.datasource.password" "$POSTGRES_PASSWORD"
 
 # ==========================================================
 # ORDER API
@@ -78,8 +79,19 @@ put "config/order-api/server.port" "8300"
 # Banco de dados
 put "config/order-api/spring.datasource.url" \
     "jdbc:postgresql://order-db:5432/db_order"
-put "config/order-api/spring.datasource.username" "postgres"
-put "config/order-api/spring.datasource.password" "postgres"
+put "config/order-api/spring.datasource.username" "$POSTGRES_USER"
+put "config/order-api/spring.datasource.password" "$POSTGRES_PASSWORD"
+put "config/order-api/resilience4j.retry.instances.product-api.max-attempts" "3"
+put "config/order-api/resilience4j.retry.instances.product-api.wait-duration" "500ms"
+put "config/order-api/resilience4j.retry.instances.product-api.ignore-exceptions[0]" "org.springframework.web.client.HttpClientErrorException"
+put "config/order-api/resilience4j.circuitbreaker.instances.product-api.sliding-window-type" "COUNT_BASED"
+put "config/order-api/resilience4j.circuitbreaker.instances.product-api.sliding-window-size" "5"
+put "config/order-api/resilience4j.circuitbreaker.instances.product-api.minimum-number-of-calls" "3"
+put "config/order-api/resilience4j.circuitbreaker.instances.product-api.failure-rate-threshold" "50"
+put "config/order-api/resilience4j.circuitbreaker.instances.product-api.wait-duration-in-open-state" "30s"
+put "config/order-api/resilience4j.circuitbreaker.instances.product-api.ignore-exceptions[0]" "org.springframework.web.client.HttpClientErrorException"
+put "config/order-api/resilience4j.retry.retry-aspect-order" "100"
+put "config/order-api/resilience4j.circuitbreaker.circuit-breaker-aspect-order" "101"
 
 # ==========================================================
 # OBSERVABILIDADE - MÉTRICAS E TRACING

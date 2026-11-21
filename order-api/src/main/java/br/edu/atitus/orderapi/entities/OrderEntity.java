@@ -1,92 +1,33 @@
 package br.edu.atitus.orderapi.entities;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "tb_order")
 public class OrderEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime orderDate;
-
-    @Column(nullable = false)
-    @JsonIgnore
-    private Long customerId; // ID do cliente logado
-
+    @Column(name = "created_at", nullable = false)
+    private OffsetDateTime createdAt;
+    @Column(name = "customer_id", nullable = false)
+    private Long customerId;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal total;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItemEntity> items;
+    private List<OrderItemEntity> items = new ArrayList<>();
 
-    @Transient
-    private double totalPrice;
-
-    @Transient
-    private double totalConvertedPrice;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
-
-    public List<OrderItemEntity> getItems() {
-        return items;
-    }
-
-    public void setItems(List<OrderItemEntity> items) {
-        this.items = items;
-    }
-
-    public double getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(double totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    public double getTotalConvertedPrice() {
-        return totalConvertedPrice;
-    }
-
-    public void setTotalConvertedPrice(double totalConvertedPrice) {
-        this.totalConvertedPrice = totalConvertedPrice;
-    }
-
-
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+    public Long getCustomerId() { return customerId; }
+    public void setCustomerId(Long customerId) { this.customerId = customerId; }
+    public BigDecimal getTotal() { return total; }
+    public void setTotal(BigDecimal total) { this.total = total; }
+    public List<OrderItemEntity> getItems() { return items; }
+    public void setItems(List<OrderItemEntity> items) { this.items = items; }
 }

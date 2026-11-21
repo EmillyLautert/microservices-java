@@ -22,7 +22,7 @@ public class CurrencyClientConfig {
     }
 
     @Bean
-    CurrencyClient getClient(RestClient.Builder builder) {
+    CurrencyClient getClient(@LoadBalanced RestClient.Builder builder) {
         SimpleClientHttpRequestFactory requestFactory =
                 new SimpleClientHttpRequestFactory();
 

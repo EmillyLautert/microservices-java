@@ -9,18 +9,22 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
-
 import java.time.Duration;
 
 @Configuration
 public class ProductClientConfig {
 
     @Bean
-    ProductClient getClientProduct(RestClient.Builder builder) {
-        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+    @LoadBalanced
+    RestClient.Builder loadBalancedRestClientBuilder(RestClientBuilderConfigurer configurer) {
+        return configurer.configure(RestClient.builder());
+    }
 
+    @Bean
+    ProductClient getClientProduct(@LoadBalanced RestClient.Builder builder) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(Duration.ofSeconds(1));
-        requestFactory.setReadTimeout(Duration.ofSeconds(2));
+        requestFactory.setReadTimeout(Duration.ofSeconds(3));
 
         RestClient restClient = builder
                 .baseUrl("http://product-api")

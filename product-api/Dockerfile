@@ -25,6 +25,9 @@ WORKDIR /app
 RUN addgroup -S spring \
     && adduser -S spring -G spring
 
+RUN mkdir -p /data/images \
+    && chown -R spring:spring /data
+
 COPY --from=build --chown=spring:spring \
     /workspace/app.jar /app/app.jar
 

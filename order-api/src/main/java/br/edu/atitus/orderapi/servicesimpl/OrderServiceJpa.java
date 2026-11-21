@@ -1,56 +1,135 @@
 package br.edu.atitus.orderapi.servicesimpl;
 
-import br.edu.atitus.orderapi.clients.CurrencyClient;
-import br.edu.atitus.orderapi.clients.ProductClient;
-import br.edu.atitus.orderapi.dtos.CurrencyResponse;
-import br.edu.atitus.orderapi.dtos.ProductResponse;
-import br.edu.atitus.orderapi.entities.OrderEntity;
-import br.edu.atitus.orderapi.entities.OrderItemEntity;
+import br.edu.atitus.orderapi.dtos.*;
+import br.edu.atitus.orderapi.entities.*;
 import br.edu.atitus.orderapi.repositories.OrderRepository;
 import br.edu.atitus.orderapi.services.OrderService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.server.ResponseStatusException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 public class OrderServiceJpa implements OrderService {
-
     private final OrderRepository orderRepository;
-    private final ProductClient productClient;
-    private final CurrencyClient currencyClient;
+    private final ProductCatalogClientService productClient;
 
-    public OrderServiceJpa(OrderRepository orderRepository, ProductClient productClient, CurrencyClient currencyClient) {
+    public OrderServiceJpa(OrderRepository orderRepository, ProductCatalogClientService productClient) {
         this.orderRepository = orderRepository;
         this.productClient = productClient;
-        this.currencyClient = currencyClient;
     }
 
     @Override
-    public OrderEntity createOrder(OrderEntity order, Long userId) {
+    @Transactional
+    public OrderDetails createOrder(OrderDTO request, Long customerId) {
+        OrderEntity order = new OrderEntity();
+        order.setCustomerId(customerId);
+        order.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
+        order.setTotal(BigDecimal.ZERO.setScale(2));
+        List<OrderItemEntity> items = new ArrayList<>();
+        BigDecimal total = BigDecimal.ZERO;
 
-        return orderRepository.save(order);
-    }
-    @Override
-    public Page<OrderEntity> findOrdersByCustomerId(Long customerId, String targetCurrency, Pageable pageable) {
-        Page<OrderEntity> orders = orderRepository.findByCustomerId(customerId, pageable);
+        for (OrderItemDTO requested : request.items()) {
+            ProductResponse product = getProduct(requested.productId());
+            if (product.price() == null || product.price().signum() <= 0)
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "O produto não possui preço válido");
+            OrderItemEntity item = new OrderItemEntity();
+            item.setProductId(product.id());
+            item.setTitle(product.title());
+            item.setType(product.type());
+            item.setUnitPrice(product.price());
+            item.setQuantity(requested.quantity());
+            item.setCurrency("BRL");
+            item.setOrder(order);
 
-
-        for (OrderEntity order : orders) {
-            double totalPrice = 0.0;
-            double totalConvertedPrice = 0.0;
-
-            for (OrderItemEntity item : order.getItems()) {
-                ProductResponse product = productClient.getProductById(item.getProductId(), targetCurrency);
-                item.setProduct(product);
-                totalPrice += item.getPriceAtPurchase() * item.getQuantity();
-
-                CurrencyResponse currencyResponse = currencyClient.getCurrency(item.getCurrencyAtPurchase(), targetCurrency);
-                item.setConvertedPriceAtPruchase(item.getPriceAtPurchase() * currencyResponse.conversionRate());
-                totalConvertedPrice += item.getConvertedPriceAtPruchase() * item.getQuantity();
+            List<DrawnBookSnapshot> drawn = List.of();
+            if ("KIT".equals(product.type())) {
+                List<DrawnBookResponse> chosen = drawBooks(product.id(), requested.quantity());
+                drawn = chosen.stream().map(book -> new DrawnBookSnapshot(book.title(), book.author(), book.image())).toList();
+            } else if (!"BOOK".equals(product.type())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Tipo de produto inválido");
             }
-            order.setTotalPrice(totalPrice);
-            order.setTotalConvertedPrice(totalConvertedPrice);
+            item.setDrawnBooks(new ArrayList<>(drawn));
+            items.add(item);
+            total = total.add(subtotal(item));
         }
-        return orders;
+        order.setItems(items);
+        order.setTotal(total.setScale(2, RoundingMode.HALF_UP));
+        return toDetails(orderRepository.save(order));
+    }
+
+    @Override
+    @Transactional
+    public List<OrderSummary> findMyOrders(Long customerId) {
+        return orderRepository.findByCustomerIdOrderByCreatedAtDesc(customerId).stream()
+                .map(order -> new OrderSummary(order.getId(), order.getCreatedAt(), order.getTotal(),
+                        order.getItems().stream().mapToInt(OrderItemEntity::getQuantity).sum()))
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public OrderDetails findMyOrder(Long id, Long customerId) {
+        OrderEntity order = orderRepository.findByIdAndCustomerId(id, customerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado"));
+        return toDetails(order);
+    }
+
+    @Override
+    @Transactional
+    public SalesResponse findSales() {
+        List<OrderEntity> orders = orderRepository.findAll();
+        BigDecimal revenue = orders.stream().map(OrderEntity::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+        List<SaleLine> sales = orders.stream().flatMap(order -> order.getItems().stream()
+                        .map(item -> new SaleLine(order.getId(), item.getTitle(), order.getCreatedAt(), item.getQuantity(), subtotal(item))))
+                .sorted(Comparator.comparing(SaleLine::date).reversed()).toList();
+        return new SalesResponse(revenue.setScale(2, RoundingMode.HALF_UP), sales);
+    }
+
+    private ProductResponse getProduct(Long id) {
+        try { return productClient.getProduct(id); }
+        catch (HttpStatusCodeException exception) {
+            if (exception.getStatusCode().value() == 404) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Não foi possível consultar o catálogo");
+        } catch (CallNotPermittedException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catálogo temporariamente indisponível");
+        } catch (RestClientException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catálogo temporariamente indisponível");
+        }
+    }
+
+    private List<DrawnBookResponse> drawBooks(Long productId, int quantity) {
+        try { return productClient.drawKitBooks(productId, quantity); }
+        catch (HttpStatusCodeException exception) {
+            if (exception.getStatusCode().value() == 409) throw new ResponseStatusException(HttpStatus.CONFLICT, "Não há livros suficientes para montar o kit");
+            if (exception.getStatusCode().value() == 404) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kit não encontrado");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Não foi possível selecionar os livros do kit");
+        } catch (CallNotPermittedException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catálogo temporariamente indisponível");
+        } catch (RestClientException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catálogo temporariamente indisponível");
+        }
+    }
+
+    private BigDecimal subtotal(OrderItemEntity item) {
+        return item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private OrderDetails toDetails(OrderEntity order) {
+        List<OrderItemView> items = order.getItems().stream().map(item -> new OrderItemView(
+                item.getProductId(), item.getTitle(), item.getType(), item.getUnitPrice(), item.getQuantity(), subtotal(item),
+                item.getDrawnBooks().stream().map(book -> new DrawnBookView(book.getTitle(), book.getAuthor(), book.getImage())).toList()
+        )).toList();
+        return new OrderDetails(order.getId(), order.getCreatedAt(), order.getTotal(), items);
     }
 }

@@ -4,11 +4,14 @@ import br.edu.atitus.currencyapi.dtos.CurrencyResponse;
 import br.edu.atitus.currencyapi.repositories.CurrencyRepository;
 import br.edu.atitus.currencyapi.services.CurrencyService;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CurrencyServiceJpa implements CurrencyService {
+    private static final Logger logger = LoggerFactory.getLogger(CurrencyServiceJpa.class);
 
     private final CurrencyRepository repository;
     private final BcbClientService bcbClientService;
@@ -35,7 +38,7 @@ public class CurrencyServiceJpa implements CurrencyService {
             Double targetRefBrl = targetCurrency.equalsIgnoreCase("BRL") ? 1 : bcbClientService.getConversionRate(targetCurrency);
             return new CurrencyResponse(sourceCurrency, targetCurrency, sourceRefBrl/targetRefBrl, environment + " (currencies in BCB)");
         } catch (Exception e) {
-            System.out.println("Erro ao buscar cotação no BCB: " + e.getMessage());
+            logger.warn("BCB indisponível para {} -> {}; tentando a cotação local", sourceCurrency, targetCurrency);
             var currency =  repository.findBySourceCurrencyAndTargetCurrency(sourceCurrency.toUpperCase(), targetCurrency.toUpperCase())
                     .orElseThrow(() -> new EntityNotFoundException("Currency não encontrado"));
 

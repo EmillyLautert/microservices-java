@@ -9,9 +9,10 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
     environment:
       GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?Set GRAFANA_PASSWORD in .env}
     depends_on:
       - prometheus
       - loki
@@ -112,6 +113,8 @@ services:
       - ./config/load-config.sh:/scripts/load-config.sh:ro
     environment:
       CONSUL_HTTP_ADDR: http://consul:8500
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     depends_on:
       consul:
         condition: service_healthy
@@ -124,12 +127,12 @@ services:
     container_name: product-db
     environment:
       POSTGRES_DB: db_product
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - product_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d db_product"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d db_product"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -142,12 +145,12 @@ services:
     container_name: currency-db
     environment:
       POSTGRES_DB: db_currency
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - currency_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d db_currency"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d db_currency"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -160,12 +163,12 @@ services:
     container_name: auth-db
     environment:
       POSTGRES_DB: db_user
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - auth_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d db_user"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d db_user"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -181,12 +184,12 @@ services:
     container_name: order-db
     environment:
       POSTGRES_DB: db_order
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - order_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d db_order" ]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d db_order" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -203,6 +206,15 @@ services:
       SPRING_CLOUD_CONSUL_PORT: 8500
       SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "true"
       SPRING_CLOUD_CONSUL_DISCOVERY_INSTANCE_ID: "$${spring.application.name}:$${HOSTNAME}"
+      IMAGES_LOCATION: /data/images
+    volumes:
+      - product_images:/data/images
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8000/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     depends_on:
       consul-config:
         condition: service_completed_successfully
@@ -221,6 +233,12 @@ services:
       SPRING_CLOUD_CONSUL_PORT: 8500
       SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "true"
       SPRING_CLOUD_CONSUL_DISCOVERY_INSTANCE_ID: "$${spring.application.name}:$${HOSTNAME}"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8100/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     depends_on:
       consul-config:
         condition: service_completed_successfully
@@ -234,12 +252,20 @@ services:
     build:
       context: ../auth-api
     container_name: auth-api
-    ports:
-      - "8200:8200"
     environment:
       SPRING_CONFIG_IMPORT: "consul:"
       SPRING_CLOUD_CONSUL_HOST: consul
       SPRING_CLOUD_CONSUL_PORT: 8500
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      LETTERA_ADMIN_EMAIL: ${LETTERA_ADMIN_EMAIL:-admin@admin.dev}
+      LETTERA_ADMIN_PASSWORD: ${LETTERA_ADMIN_PASSWORD:?Set LETTERA_ADMIN_PASSWORD in .env}
+      LETTERA_DEMO_BUYER_PASSWORD: ${LETTERA_DEMO_BUYER_PASSWORD:?Set LETTERA_DEMO_BUYER_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8200/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     depends_on:
       consul-config:
         condition: service_completed_successfully
@@ -259,9 +285,24 @@ services:
       SPRING_CONFIG_IMPORT: "consul:"
       SPRING_CLOUD_CONSUL_HOST: consul
       SPRING_CLOUD_CONSUL_PORT: 8500
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     depends_on:
       consul-config:
         condition: service_completed_successfully
+      auth-api:
+        condition: service_healthy
+      product-api:
+        condition: service_healthy
+      currency-api:
+        condition: service_healthy
+      order-api:
+        condition: service_healthy
     networks:
       - backend
     restart: unless-stopped
@@ -277,10 +318,18 @@ services:
       SPRING_CONFIG_IMPORT: "consul:"
       SPRING_CLOUD_CONSUL_HOST: consul
       SPRING_CLOUD_CONSUL_PORT: 8500
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8300/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     depends_on:
       consul-config:
         condition: service_completed_successfully
       order-db:
+        condition: service_healthy
+      product-api:
         condition: service_healthy
     networks:
       - backend
@@ -302,3 +351,4 @@ volumes:
   loki_data:
   alloy_data:
   grafana_data:
+  product_images:
