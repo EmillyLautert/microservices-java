@@ -4,7 +4,54 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="421462a6-1e55-441a-80b7-c9c6e6794730" name="Changes" comment="Atividades Importando e integrando o Order API e Implementando Observabilidade" />
+    <list default="true" id="421462a6-1e55-441a-80b7-c9c6e6794730" name="Changes" comment="Projeto Integrador">
+      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/App.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/app.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/components/Botao.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/components/CampoTexto.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/components/CardProduto.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/components/FiltroCategoria.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/constants/theme.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/pages/DetalhesProduto.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/pages/Home.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/pages/InformacoesGrupo.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/pages/Login.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/routes/routes.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/services/api.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/services/authService.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Trabalho-G1-Projeto-Design-Engenharia-de-Processos-main/src/services/productService.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/configs/SellerAccountInitializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/dtos/UserResponseDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/auth-api/src/main/resources/db/migration/V3__EnforceUniqueUserEmail.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker/grafana/provisioning/datasources/datasources.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/controllers/ApiExceptionHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/DrawnBookResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/DrawnBookView.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/OrderDetails.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/OrderItemView.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/OrderSummary.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/SaleLine.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/SalesResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/entities/DrawnBookSnapshot.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/servicesimpl/ProductCatalogClientService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/order-api/src/main/resources/db/migration/V2__AdaptOrdersForBookStore.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/configs/ImageResourceConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/controllers/ApiExceptionHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/controllers/InternalKitController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/controllers/WsProductController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/dtos/DrawnBookResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/entities/ProductType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/ImageStorageService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/KitSelectionStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/RandomKitSelectionStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V3__AdaptCatalogForLettera.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requests.http" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -34,26 +81,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "SHELLCHECK.PATH": "I do mind",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "settings.sync"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;SHELLCHECK.PATH&quot;: &quot;I do mind&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -79,6 +126,7 @@
     <MESSAGE value="Atualização dos códigos" />
     <MESSAGE value="Atividade Containerização de Microsserviços com Docker" />
     <MESSAGE value="Atividades Importando e integrando o Order API e Implementando Observabilidade" />
-    <option name="LAST_COMMIT_MESSAGE" value="Atividades Importando e integrando o Order API e Implementando Observabilidade" />
+    <MESSAGE value="Projeto Integrador" />
+    <option name="LAST_COMMIT_MESSAGE" value="Projeto Integrador" />
   </component>
 </project>

@@ -1,0 +1,89 @@
+@baseUrl = http://localhost:8080
+@buyerToken = replace-with-buyer-jwt
+@sellerToken = replace-with-seller-jwt
+@buyerPassword = replace-with-LETTERA_DEMO_BUYER_PASSWORD-from-.env
+@productId = 1
+@orderId = 1
+
+### Cadastro de comprador
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{"name":"Nova Leitora","email":"nova.leitora@example.com","password":"Leitura@2026"}
+
+### Login
+POST {{baseUrl}}/auth/signin
+Content-Type: application/json
+
+{"email":"comprador@teste.com","password":"{{buyerPassword}}"}
+
+### Catálogo paginado e filtrado
+GET {{baseUrl}}/products?category=Terror&type=BOOK&search=Dracula&page=0&size=10
+
+### Detalhe do livro ou kit
+GET {{baseUrl}}/products/{{productId}}
+
+### Cotação legada (serviço currency-api)
+GET {{baseUrl}}/currencies?source=USD&target=BRL
+
+### Imagem pública (use o caminho retornado pelo catálogo)
+GET {{baseUrl}}/images/<arquivo>
+
+### Criar livro (vendedor)
+POST {{baseUrl}}/ws/products
+Authorization: Bearer {{sellerToken}}
+Content-Type: application/json
+
+{"title":"O Iluminado","author":"Stephen King","description":"Um hotel isolado e uma família em perigo.","category":"Terror","type":"BOOK","bookCount":null,"price":49.90,"currency":"BRL","image":null}
+
+### Criar kit (vendedor)
+POST {{baseUrl}}/ws/products
+Authorization: Bearer {{sellerToken}}
+Content-Type: application/json
+
+{"title":"Kit Terror","author":null,"description":"Dois livros escolhidos no checkout.","category":"Terror","type":"KIT","bookCount":2,"price":69.90,"currency":"BRL","image":null}
+
+### Atualizar produto (vendedor; PUT envia todos os campos)
+PUT {{baseUrl}}/ws/products/{{productId}}
+Authorization: Bearer {{sellerToken}}
+Content-Type: application/json
+
+{"title":"Drácula","author":"Bram Stoker","description":"Edição atualizada.","category":"Terror","type":"BOOK","bookCount":null,"price":44.90,"currency":"BRL","image":null}
+
+### Upload de capa (vendedor; multipart file)
+POST {{baseUrl}}/ws/products/{{productId}}/image
+Authorization: Bearer {{sellerToken}}
+Content-Type: multipart/form-data; boundary=UploadBoundary
+
+--UploadBoundary
+Content-Disposition: form-data; name="file"; filename="capa.jpg"
+Content-Type: image/jpeg
+
+< ./capa.jpg
+--UploadBoundary--
+
+### Remover produto (vendedor)
+DELETE {{baseUrl}}/ws/products/{{productId}}
+Authorization: Bearer {{sellerToken}}
+
+### Finalizar compra (o productId 11 é kit na carga inicial)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{buyerToken}}
+Content-Type: application/json
+
+{"items":[{"productId":1,"quantity":1},{"productId":11,"quantity":2}]}
+
+### Histórico do comprador
+GET {{baseUrl}}/orders/me
+Authorization: Bearer {{buyerToken}}
+
+### Detalhe de pedido do comprador
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{buyerToken}}
+
+### Histórico de vendas (vendedor)
+GET {{baseUrl}}/ws/orders/sales
+Authorization: Bearer {{sellerToken}}
+
+### Seleção interna do kit (execute de um container na rede Docker; não disponível pelo Gateway)
+GET http://product-api:8000/internal/kits/11/draw?quantity=2
