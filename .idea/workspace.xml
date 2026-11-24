@@ -5,55 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="421462a6-1e55-441a-80b7-c9c6e6794730" name="Changes" comment="Projeto Integrador">
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth-api/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/auth-api/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/auth-api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/controllers/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/controllers/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/dtos/SignupRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/dtos/SignupRequestDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/dtos/UserResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/dtos/UserResponseDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/entities/UserEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/entities/UserEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/servicesimpl/UserServiceJpa.java" beforeDir="false" afterPath="$PROJECT_DIR$/auth-api/src/main/java/br/edu/atitus/authapi/servicesimpl/UserServiceJpa.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/currency-api/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/currency-api/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/currency-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/currency-api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/currency-api/src/main/java/br/edu/atitus/currencyapi/controllers/CurrencyController.java" beforeDir="false" afterPath="$PROJECT_DIR$/currency-api/src/main/java/br/edu/atitus/currencyapi/controllers/CurrencyController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/currency-api/src/main/java/br/edu/atitus/currencyapi/servicesimpl/BcbClientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/currency-api/src/main/java/br/edu/atitus/currencyapi/servicesimpl/BcbClientService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/currency-api/src/main/java/br/edu/atitus/currencyapi/servicesimpl/CurrencyServiceJpa.java" beforeDir="false" afterPath="$PROJECT_DIR$/currency-api/src/main/java/br/edu/atitus/currencyapi/servicesimpl/CurrencyServiceJpa.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/currency-api/src/main/resources/db/migration/V2__PopulateTableTbCurrency.sql" beforeDir="false" afterPath="$PROJECT_DIR$/currency-api/src/main/resources/db/migration/V2__PopulateTableTbCurrency.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/alloy/config.alloy" beforeDir="false" afterPath="$PROJECT_DIR$/docker/alloy/config.alloy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/config/load-config.sh" beforeDir="false" afterPath="$PROJECT_DIR$/docker/config/load-config.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/prometheus/prometheus.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker/prometheus/prometheus.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateway-api/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-api/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateway-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateway-api/src/main/java/br/edu/atitus/gatewayapi/configs/GatewayConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-api/src/main/java/br/edu/atitus/gatewayapi/configs/GatewayConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/controllers/ApiExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/controllers/ApiExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/controllers/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/controllers/OrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/OrderDetails.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/OrderDetails.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/OrderSummary.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/OrderSummary.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/SaleLine.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/SaleLine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/SalesResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/SalesResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/repositories/OrderRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/repositories/OrderRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/services/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/services/OrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/servicesimpl/OrderServiceJpa.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/servicesimpl/OrderServiceJpa.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/clients/CurrencyClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/clients/CurrencyClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/controllers/ApiExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/controllers/ApiExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/dtos/ProductRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/dtos/ProductRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/entities/ProductEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/entities/ProductEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/repositories/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/repositories/ProductRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/services/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/services/ProductService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/ImageStorageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/ImageStorageService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/ProductServiceJpa.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/ProductServiceJpa.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/RandomKitSelectionStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/RandomKitSelectionStrategy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V1__CreateTableTbProduct.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V2__PopulateTableTbProduct.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V3__AdaptCatalogForLettera.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requests.http" beforeDir="false" afterPath="$PROJECT_DIR$/requests.http" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
