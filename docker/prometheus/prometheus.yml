@@ -4,41 +4,26 @@ global:
 
 scrape_configs:
 
-  # ========================================================
-  # GATEWAY API
-  # ========================================================
   - job_name: 'gateway-api'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['gateway-api:8080']
 
-  # ========================================================
-  # AUTH API
-  # ========================================================
   - job_name: 'auth-api'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['auth-api:8200']
 
-  # ========================================================
-  # PRODUCT API
-  # ========================================================
   - job_name: 'product-api'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['product-api:8000']
 
-  # ========================================================
-  # CURRENCY API
-  # ========================================================
   - job_name: 'currency-api'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['currency-api:8100']
 
-  # ========================================================
-  # ORDER API
-  # ========================================================
   - job_name: 'order-api'
     metrics_path: '/actuator/prometheus'
     static_configs:

@@ -26,13 +26,10 @@ public class BcbClientService {
             key = "#currency"
     )
     public Double getConversionRate(String currency) {
-        //Busca no BCB se existe cotação para a moeda solicitada
         LocalDate quoteDate = LocalDate.now(ZoneId.of("America/Sao_Paulo")).minusDays(1);
         while (quoteDate.getDayOfWeek().getValue() > 5) quoteDate = quoteDate.minusDays(1);
         String formattedDate = "'" + quoteDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "'";
         var conversionRate = cbClient.getBcbCurrency(String.format("'%s'", currency.toUpperCase()), formattedDate, "json");
-        //Se o retorno for útli, retorna o valor da última cotação de venda do dia
-        // Caso não haja cotações, ou ocorra algum outro erro, é lançado uma exception
         return conversionRate.value().getLast().cotacaoVenda();
     }
 }

@@ -3,4 +3,5 @@ package br.edu.atitus.orderapi.dtos;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-public record OrderSummary(Long id, OffsetDateTime createdAt, BigDecimal total, int itemCount) { }
+public record OrderSummary(Long id, OffsetDateTime createdAt, String status,
+                           BigDecimal total, int itemCount) { }

@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface ProductService {
     Page<ProductResponse> findAll(String category, ProductType type, String search, Pageable pageable);
+    List<String> findCategories();
     ProductResponse findById(Long id);
     ProductResponse create(ProductRequest request);
     ProductResponse update(Long id, ProductRequest request);

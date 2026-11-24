@@ -5,6 +5,8 @@ import br.edu.atitus.currencyapi.services.CurrencyService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.Locale;
@@ -36,6 +38,16 @@ public class CurrencyController {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> notFound(EntityNotFoundException ignored) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cotação não encontrada para as moedas informadas");
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<String> missingParameter(MissingServletRequestParameterException ignored) {
+        return ResponseEntity.badRequest().body("Informe as moedas de origem e destino.");
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> invalidParameter(MethodArgumentTypeMismatchException ignored) {
+        return ResponseEntity.badRequest().body("Parâmetro inválido.");
     }
 
     @ExceptionHandler(Exception.class)

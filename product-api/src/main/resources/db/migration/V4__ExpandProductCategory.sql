@@ -1,0 +1,1 @@
+ALTER TABLE tb_product ALTER COLUMN category TYPE VARCHAR(255);

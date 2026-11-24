@@ -9,7 +9,7 @@
 POST {{baseUrl}}/auth/signup
 Content-Type: application/json
 
-{"name":"Nova Leitora","email":"nova.leitora@example.com","password":"Leitura@2026"}
+{"name":"Nova Leitora","email":"nova.leitora@example.com","phone":"(11) 98765-4321","password":"Leitura@2026"}
 
 ### Login
 POST {{baseUrl}}/auth/signin
@@ -19,6 +19,9 @@ Content-Type: application/json
 
 ### Catálogo paginado e filtrado
 GET {{baseUrl}}/products?category=Terror&type=BOOK&search=Dracula&page=0&size=10
+
+### Gêneros disponíveis (valores dinâmicos cadastrados no catálogo)
+GET {{baseUrl}}/categories
 
 ### Detalhe do livro ou kit
 GET {{baseUrl}}/products/{{productId}}
@@ -41,7 +44,7 @@ POST {{baseUrl}}/ws/products
 Authorization: Bearer {{sellerToken}}
 Content-Type: application/json
 
-{"title":"Kit Terror","author":null,"description":"Dois livros escolhidos no checkout.","category":"Terror","type":"KIT","bookCount":2,"price":69.90,"currency":"BRL","image":null}
+{"author":null,"description":"Três livros escolhidos no checkout.","category":"Terror","type":"KIT","price":69.90,"currency":"BRL","image":null}
 
 ### Atualizar produto (vendedor; PUT envia todos os campos)
 PUT {{baseUrl}}/ws/products/{{productId}}
@@ -71,7 +74,7 @@ POST {{baseUrl}}/orders
 Authorization: Bearer {{buyerToken}}
 Content-Type: application/json
 
-{"items":[{"productId":1,"quantity":1},{"productId":11,"quantity":2}]}
+{"items":[{"productId":1,"quantity":1},{"productId":11,"quantity":1}]}
 
 ### Histórico do comprador
 GET {{baseUrl}}/orders/me
@@ -82,8 +85,12 @@ GET {{baseUrl}}/orders/{{orderId}}
 Authorization: Bearer {{buyerToken}}
 
 ### Histórico de vendas (vendedor)
-GET {{baseUrl}}/ws/orders/sales
+GET {{baseUrl}}/ws/orders/sales?period=2026-11&type=ALL
+Authorization: Bearer {{sellerToken}}
+
+### Vendas do gênero de produto BOOK ou KIT (período no formato AAAA-MM)
+GET {{baseUrl}}/ws/orders/sales?period=2026-11&type=BOOK
 Authorization: Bearer {{sellerToken}}
 
 ### Seleção interna do kit (execute de um container na rede Docker; não disponível pelo Gateway)
-GET http://product-api:8000/internal/kits/11/draw?quantity=2
+GET http://product-api:8000/internal/kits/11/draw?quantity=1

@@ -1,5 +1,3 @@
-#!/bin/sh
-
 set -eu
 
 : "${POSTGRES_USER:?POSTGRES_USER precisa estar definido no .env}"
@@ -18,7 +16,6 @@ put() {
     consul kv put "$1" "$2"
 }
 
-# Configurações gerais
 put "config/application/management.endpoints.web.exposure.include" "health,prometheus,info"
 put "config/application/management.endpoint.health.show-components" "never"
 put "config/application/management.endpoint.health.show-details" "never"
@@ -26,8 +23,9 @@ put "config/application/management.health.livenessstate.enabled" "true"
 put "config/application/management.health.readinessstate.enabled" "true"
 put "config/application/management.health.db.enabled" "true"
 
-# Product API
 put "config/product-api/server.port" "8000"
+put "config/product-api/spring.servlet.multipart.max-file-size" "5MB"
+put "config/product-api/spring.servlet.multipart.max-request-size" "6MB"
 put "config/product-api/spring.datasource.url" "jdbc:postgresql://product-db:5432/db_product"
 put "config/product-api/spring.datasource.username" "$POSTGRES_USER"
 put "config/product-api/spring.datasource.password" "$POSTGRES_PASSWORD"
@@ -45,7 +43,6 @@ put "config/product-api/spring.cache.caffeine.spec" "maximumSize=1000,expireAfte
 put "config/product-api/resilience4j.retry.retry-aspect-order" "100"
 put "config/product-api/resilience4j.circuitbreaker.circuit-breaker-aspect-order" "101"
 
-# Currency API
 put "config/currency-api/server.port" "8100"
 put "config/currency-api/spring.datasource.url" "jdbc:postgresql://currency-db:5432/db_currency"
 put "config/currency-api/spring.datasource.username" "$POSTGRES_USER"
@@ -64,47 +61,36 @@ put "config/currency-api/spring.cache.caffeine.spec" "maximumSize=1000,expireAft
 put "config/currency-api/resilience4j.retry.retry-aspect-order" "100"
 put "config/currency-api/resilience4j.circuitbreaker.circuit-breaker-aspect-order" "101"
 
-# Auth API
 put "config/auth-api/server.port" "8200"
 put "config/auth-api/spring.datasource.url" "jdbc:postgresql://auth-db:5432/db_user"
 put "config/auth-api/spring.datasource.username" "$POSTGRES_USER"
 put "config/auth-api/spring.datasource.password" "$POSTGRES_PASSWORD"
 
-# ==========================================================
-# ORDER API
-# ==========================================================
 
 put "config/order-api/server.port" "8300"
 
-# Banco de dados
 put "config/order-api/spring.datasource.url" \
     "jdbc:postgresql://order-db:5432/db_order"
 put "config/order-api/spring.datasource.username" "$POSTGRES_USER"
 put "config/order-api/spring.datasource.password" "$POSTGRES_PASSWORD"
 put "config/order-api/resilience4j.retry.instances.product-api.max-attempts" "3"
 put "config/order-api/resilience4j.retry.instances.product-api.wait-duration" "500ms"
-put "config/order-api/resilience4j.retry.instances.product-api.ignore-exceptions[0]" "org.springframework.web.client.HttpClientErrorException"
+put "config/order-api/resilience4j.retry.instances.product-api.ignore-exceptions" "org.springframework.web.client.HttpClientErrorException"
 put "config/order-api/resilience4j.circuitbreaker.instances.product-api.sliding-window-type" "COUNT_BASED"
 put "config/order-api/resilience4j.circuitbreaker.instances.product-api.sliding-window-size" "5"
 put "config/order-api/resilience4j.circuitbreaker.instances.product-api.minimum-number-of-calls" "3"
 put "config/order-api/resilience4j.circuitbreaker.instances.product-api.failure-rate-threshold" "50"
 put "config/order-api/resilience4j.circuitbreaker.instances.product-api.wait-duration-in-open-state" "30s"
-put "config/order-api/resilience4j.circuitbreaker.instances.product-api.ignore-exceptions[0]" "org.springframework.web.client.HttpClientErrorException"
+put "config/order-api/resilience4j.circuitbreaker.instances.product-api.ignore-exceptions" "org.springframework.web.client.HttpClientErrorException"
 put "config/order-api/resilience4j.retry.retry-aspect-order" "100"
 put "config/order-api/resilience4j.circuitbreaker.circuit-breaker-aspect-order" "101"
 
-# ==========================================================
-# OBSERVABILIDADE - MÉTRICAS E TRACING
-# ==========================================================
 
-# Identificação das aplicações
 put "config/application/management.prometheus.metrics.export.enabled" "true"
 
-# Tracing
 put "config/application/management.tracing.enabled" "true"
 put "config/application/management.tracing.sampling.probability" "1.0"
 
-# Exportação dos traces para Zipkin
 put "config/application/management.tracing.export.zipkin.endpoint" "http://zipkin:9411/api/v2/spans"
 
 echo "=========================================="

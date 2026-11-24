@@ -4,11 +4,14 @@ import br.edu.atitus.orderapi.dtos.OrderDTO;
 import br.edu.atitus.orderapi.dtos.OrderDetails;
 import br.edu.atitus.orderapi.dtos.OrderSummary;
 import br.edu.atitus.orderapi.dtos.SalesResponse;
+import br.edu.atitus.orderapi.dtos.SalesProductFilter;
 import br.edu.atitus.orderapi.services.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import java.util.List;
+import java.time.YearMonth;
 
 @RestController
 public class OrderController {
@@ -32,5 +35,9 @@ public class OrderController {
     }
 
     @GetMapping("/ws/orders/sales")
-    public SalesResponse sales() { return orderService.findSales(); }
+    public SalesResponse sales(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth period,
+            @RequestParam(defaultValue = "ALL") SalesProductFilter type) {
+        return orderService.findSales(period, type);
+    }
 }

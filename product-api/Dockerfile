@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 FROM maven:3.9-eclipse-temurin-25-alpine AS build
 
 WORKDIR /workspace
@@ -9,12 +7,12 @@ COPY mvnw pom.xml ./
 
 RUN chmod +x mvnw
 
-RUN --mount=type=cache,target=/root/.m2 \
+RUN \
     ./mvnw -B -DskipTests dependency:go-offline
 
 COPY src/ src/
 
-RUN --mount=type=cache,target=/root/.m2 \
+RUN \
     ./mvnw -B -DskipTests package \
     && cp target/*.jar /workspace/app.jar
 

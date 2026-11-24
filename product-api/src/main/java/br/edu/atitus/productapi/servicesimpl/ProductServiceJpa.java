@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import java.util.TreeMap;
 
 @Service
 public class ProductServiceJpa implements ProductService {
@@ -42,6 +43,13 @@ public class ProductServiceJpa implements ProductService {
                 ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("title").ascending())
                 : pageable;
         return repository.findAll(spec, sorted).map(ProductResponse::fromEntity);
+    }
+
+    @Override
+    public List<String> findCategories() {
+        TreeMap<String, String> categories = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        repository.findDistinctCategories().forEach(category -> categories.putIfAbsent(category, category));
+        return List.copyOf(categories.values());
     }
 
     @Override
@@ -90,23 +98,24 @@ public class ProductServiceJpa implements ProductService {
     }
 
     private ProductEntity toEntity(ProductEntity entity, ProductRequest request) {
+        if (request.type() == ProductType.BOOK && (request.title() == null || request.title().isBlank()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Título é obrigatório para livros");
         if (request.type() == ProductType.BOOK && (request.author() == null || request.author().isBlank()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Autor é obrigatório para livros");
         if (request.type() == ProductType.BOOK && request.bookCount() != null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bookCount deve ser nulo para livros");
-        if (request.type() == ProductType.KIT && (request.bookCount() == null || request.bookCount() < 1))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bookCount deve ser maior que zero para kits");
         if (request.currency() != null && !"BRL".equalsIgnoreCase(request.currency().trim()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A moeda do catálogo deve ser BRL");
         if (request.image() != null && !request.image().isBlank()
                 && (!request.image().startsWith("/images/") || request.image().contains("..") || request.image().contains("\\")))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A imagem deve ser enviada pelo endpoint de upload");
-        entity.setTitle(request.title().trim());
+        String category = request.category().trim();
+        entity.setTitle(request.type() == ProductType.KIT ? "Kit " + category : request.title().trim());
         entity.setAuthor(request.type() == ProductType.BOOK ? request.author().trim() : null);
-        entity.setDescription(request.description().trim());
-        entity.setCategory(request.category().trim());
+        entity.setDescription(request.description() == null ? null : request.description().trim());
+        entity.setCategory(category);
         entity.setType(request.type());
-        entity.setBookCount(request.type() == ProductType.KIT ? request.bookCount() : null);
+        entity.setBookCount(request.type() == ProductType.KIT ? 3 : null);
         entity.setPrice(request.price());
         entity.setCurrency("BRL");
         entity.setImage(request.image() == null || request.image().isBlank() ? null : request.image().trim());

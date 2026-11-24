@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -38,6 +39,7 @@ public class AuthController {
         user.setName(dto.name());
         user.setEmail(dto.email());
         user.setPassword(dto.password());
+        user.setPhone(dto.phone());
         return user;
     }
 
@@ -72,6 +74,11 @@ public class AuthController {
         String message = exception.getBindingResult().getFieldErrors().stream().findFirst()
                 .map(error -> error.getDefaultMessage()).orElse("Dados inválidos");
         return ResponseEntity.badRequest().body(message);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<String> unreadableRequest(HttpMessageNotReadableException ignored) {
+        return ResponseEntity.badRequest().body("Corpo da requisição inválido. Verifique os dados enviados.");
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

@@ -27,12 +27,10 @@ public class CurrencyServiceJpa implements CurrencyService {
     @Override
     public CurrencyResponse findBySourceCurrencyAndTargetCurrency(String sourceCurrency, String targetCurrency) throws Exception {
         String environment = "Currency API running in port " + serverPort;
-        //Mesmas moedas = taxa de conversão = 1.0
         if (sourceCurrency.equalsIgnoreCase(targetCurrency)) {
             return new CurrencyResponse(sourceCurrency, targetCurrency, 1.0, environment + " (same currencies)");
         }
 
-        //Moedas diferentes, tenta buscar no BCB as conversões em relação ao Real para calcular
         try {
             Double sourceRefBrl = sourceCurrency.equalsIgnoreCase("BRL") ? 1 : bcbClientService.getConversionRate(sourceCurrency);
             Double targetRefBrl = targetCurrency.equalsIgnoreCase("BRL") ? 1 : bcbClientService.getConversionRate(targetCurrency);
@@ -40,7 +38,7 @@ public class CurrencyServiceJpa implements CurrencyService {
         } catch (Exception e) {
             logger.warn("BCB indisponível para {} -> {}; tentando a cotação local", sourceCurrency, targetCurrency);
             var currency =  repository.findBySourceCurrencyAndTargetCurrency(sourceCurrency.toUpperCase(), targetCurrency.toUpperCase())
-                    .orElseThrow(() -> new EntityNotFoundException("Currency não encontrado"));
+                    .orElseThrow(() -> new EntityNotFoundException("Cotação não encontrada"));
 
             return new CurrencyResponse(currency.getSourceCurrency(), currency.getTargetCurrency(), currency.getConversionRate(), environment + " (currencies em Local DB)");
         }

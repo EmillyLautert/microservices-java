@@ -11,9 +11,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import java.util.regex.Pattern;
 
 @Service
 public class UserServiceJpa implements UserService {
+    private static final Pattern PHONE_DIGITS = Pattern.compile("\\d{10,11}");
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
 
@@ -32,6 +34,15 @@ public class UserServiceJpa implements UserService {
 
         user.setName(user.getName().trim());
         user.setEmail(user.getEmail().trim().toLowerCase());
+        if (user.getPhone() != null && !user.getPhone().isBlank()) {
+            String phone = user.getPhone().trim();
+            String digits = phone.replaceAll("\\D", "");
+            if (!PHONE_DIGITS.matcher(digits).matches())
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Telefone inválido");
+            user.setPhone(phone);
+        } else {
+            user.setPhone(null);
+        }
 
         if (user.getId() != null) {
             if (userRepository.existsByEmailAndIdNot(user.getEmail(), user.getId()))
@@ -40,7 +51,6 @@ public class UserServiceJpa implements UserService {
             if (userRepository.existsByEmail(user.getEmail()))
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe usuário com este e-mail");
         }
-        // TODO validar se usuário tem permissão para o tipo escolhido
     }
 
     private void format(UserEntity user) throws Exception {

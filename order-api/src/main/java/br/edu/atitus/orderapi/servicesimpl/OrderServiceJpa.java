@@ -14,9 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -72,7 +72,7 @@ public class OrderServiceJpa implements OrderService {
     @Transactional
     public List<OrderSummary> findMyOrders(Long customerId) {
         return orderRepository.findByCustomerIdOrderByCreatedAtDesc(customerId).stream()
-                .map(order -> new OrderSummary(order.getId(), order.getCreatedAt(), order.getTotal(),
+                .map(order -> new OrderSummary(order.getId(), order.getCreatedAt(), "COMPLETED", order.getTotal(),
                         order.getItems().stream().mapToInt(OrderItemEntity::getQuantity).sum()))
                 .toList();
     }
@@ -87,13 +87,33 @@ public class OrderServiceJpa implements OrderService {
 
     @Override
     @Transactional
-    public SalesResponse findSales() {
-        List<OrderEntity> orders = orderRepository.findAll();
-        BigDecimal revenue = orders.stream().map(OrderEntity::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
-        List<SaleLine> sales = orders.stream().flatMap(order -> order.getItems().stream()
-                        .map(item -> new SaleLine(order.getId(), item.getTitle(), order.getCreatedAt(), item.getQuantity(), subtotal(item))))
-                .sorted(Comparator.comparing(SaleLine::date).reversed()).toList();
-        return new SalesResponse(revenue.setScale(2, RoundingMode.HALF_UP), sales);
+    public SalesResponse findSales(YearMonth period, SalesProductFilter type) {
+        YearMonth selectedPeriod = period == null ? YearMonth.now(ZoneOffset.UTC) : period;
+        SalesProductFilter selectedType = type == null ? SalesProductFilter.ALL : type;
+        OffsetDateTime start = selectedPeriod.atDay(1).atStartOfDay().atOffset(ZoneOffset.UTC);
+        OffsetDateTime end = selectedPeriod.plusMonths(1).atDay(1).atStartOfDay().atOffset(ZoneOffset.UTC);
+        List<OrderEntity> orders = orderRepository
+                .findByCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByCreatedAtDesc(start, end);
+
+        List<SaleOrder> sales = new ArrayList<>();
+        BigDecimal totalRevenue = BigDecimal.ZERO;
+        int itemsSold = 0;
+        for (OrderEntity order : orders) {
+            List<OrderItemEntity> matchingItems = order.getItems().stream()
+                    .filter(item -> selectedType == SalesProductFilter.ALL || item.getType().equals(selectedType.name()))
+                    .toList();
+            if (matchingItems.isEmpty()) continue;
+
+            List<SaleLine> lines = matchingItems.stream()
+                    .map(item -> new SaleLine(item.getTitle(), item.getType(), item.getQuantity(), subtotal(item)))
+                    .toList();
+            BigDecimal orderTotal = lines.stream().map(SaleLine::total).reduce(BigDecimal.ZERO, BigDecimal::add);
+            itemsSold += matchingItems.stream().mapToInt(OrderItemEntity::getQuantity).sum();
+            totalRevenue = totalRevenue.add(orderTotal);
+            sales.add(new SaleOrder(order.getId(), order.getCreatedAt(), orderTotal, lines));
+        }
+        return new SalesResponse(selectedPeriod, selectedType.name(),
+                totalRevenue.setScale(2, RoundingMode.HALF_UP), sales.size(), itemsSold, sales);
     }
 
     private ProductResponse getProduct(Long id) {
@@ -130,6 +150,6 @@ public class OrderServiceJpa implements OrderService {
                 item.getProductId(), item.getTitle(), item.getType(), item.getUnitPrice(), item.getQuantity(), subtotal(item),
                 item.getDrawnBooks().stream().map(book -> new DrawnBookView(book.getTitle(), book.getAuthor(), book.getImage())).toList()
         )).toList();
-        return new OrderDetails(order.getId(), order.getCreatedAt(), order.getTotal(), items);
+        return new OrderDetails(order.getId(), order.getCreatedAt(), "COMPLETED", order.getTotal(), items);
     }
 }

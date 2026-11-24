@@ -10,7 +10,6 @@ public class RandomKitSelectionStrategy<T> implements KitSelectionStrategy<T> {
     @Override
     public List<T> select(List<T> candidates, int quantity) {
         if (quantity < 0 || quantity > candidates.size()) throw new IllegalArgumentException("Quantidade de livros indisponível");
-        // Partial Fisher-Yates: O(n) para copiar a lista, depois O(k) para sortear k livros sem repetição.
         List<T> shuffled = new ArrayList<>(candidates);
         for (int i = 0; i < quantity; i++) {
             int selected = ThreadLocalRandom.current().nextInt(i, shuffled.size());

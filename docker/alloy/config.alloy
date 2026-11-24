@@ -1,12 +1,6 @@
-// ==========================================================
-// DESCOBERTA DOS CONTAINERS DOCKER
-// ==========================================================
 discovery.docker "containers" {
     host = "unix:///var/run/docker.sock"
 }
-// ==========================================================
-// IDENTIFICAÇÃO DOS CONTAINERS
-// ==========================================================
 discovery.relabel "docker_logs" {
 
     targets = []
@@ -17,9 +11,6 @@ discovery.relabel "docker_logs" {
         target_label  = "container_name"
     }
 }
-// ==========================================================
-// COLETA DOS LOGS DOS CONTAINERS
-// ==========================================================
 loki.source.docker "containers" {
     host = "unix:///var/run/docker.sock"
     targets = discovery.docker.containers.targets
@@ -31,11 +22,7 @@ loki.source.docker "containers" {
         loki.process.docker_logs.receiver,
     ]
 }
-// ==========================================================
-// PROCESSAMENTO DOS LOGS
-// ==========================================================
 loki.process "docker_logs" {
-    // Evita armazenar os próprios logs do Alloy e Loki
     forward_to = [
         loki.write.local.receiver,
     ]
@@ -44,9 +31,6 @@ loki.process "docker_logs" {
         expression = "(alloy|loki)"
     }
 }
-// ==========================================================
-// ENVIO DOS LOGS PARA O LOKI
-// ==========================================================
 loki.write "local" {
     endpoint {
         url = "http://loki:3100/loki/api/v1/push"

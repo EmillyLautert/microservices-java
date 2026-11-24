@@ -20,6 +20,8 @@ public class UserEntity implements UserDetails {
 
     private String email;
     private String name;
+    @Column(length = 20)
+    private String phone;
     @JsonIgnore
     private String password;
     @Enumerated(EnumType.ORDINAL)
@@ -47,6 +49,14 @@ public class UserEntity implements UserDetails {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     @Override

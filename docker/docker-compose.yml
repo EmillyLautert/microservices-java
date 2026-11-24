@@ -1,7 +1,4 @@
 services:
-  # ==========================================================
-  # GRAFANA - OBSERVABILITY DASHBOARDS
-  # ==========================================================
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -21,9 +18,6 @@ services:
     networks:
       - backend
 
-  # ==========================================================
-  # GRAFANA ALLOY - LOG COLLECTION
-  # ==========================================================
   alloy:
     image: grafana/alloy:latest
     container_name: alloy
@@ -44,9 +38,6 @@ services:
     networks:
       - backend
 
-  # ==========================================================
-  # LOKI - LOG AGGREGATION
-  # ==========================================================
   loki:
     image: grafana/loki:3.7.0
     container_name: loki
@@ -61,9 +52,6 @@ services:
     networks:
       - backend
 
-  # ==========================================================
-  # PROMETHEUS - METRICS COLLECTION
-  # ==========================================================
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -79,9 +67,6 @@ services:
     networks:
       - backend
 
-  # ==========================================================
-  # ZIPKIN - DISTRIBUTED TRACING
-  # ==========================================================
   zipkin:
     image: openzipkin/zipkin:latest
     container_name: zipkin
@@ -176,9 +161,6 @@ services:
       - backend
     restart: unless-stopped
 
-  # ==========================================================
-  # BANCO DE DADOS - ORDER API
-  # ==========================================================
   order-db:
     image: postgres:17
     container_name: order-db
@@ -307,9 +289,6 @@ services:
       - backend
     restart: unless-stopped
 
-  # ==========================================================
-  # ORDER API
-  # ==========================================================
   order-api:
     build:
       context: ../order-api
@@ -339,9 +318,6 @@ networks:
   backend:
     driver: bridge
 
-# ============================================================
-# VOLUMES PERSISTENTES DOS BANCOS
-# ============================================================
 volumes:
   product_data:
   currency_data:

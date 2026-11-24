@@ -12,7 +12,9 @@ public class ProductEntity {
 
     private String title;
     private String author;
+    @Column(columnDefinition = "TEXT")
     private String description;
+    @Column(length = 255)
     private String category;
 
     @Enumerated(EnumType.STRING)
