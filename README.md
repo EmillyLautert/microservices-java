@@ -226,7 +226,9 @@ docker compose -f docker/docker-compose.yml down -v --remove-orphans
 docker compose -f docker/docker-compose.yml up --build -d
 ```
 
-Em uma instalação nova, as migrations criam as tabelas e os dados iniciais. Bancos do projeto-base que já aplicaram V1–V3 são atualizados pela migration V4; o catálogo anterior é preservado em `tb_product_legacy` e o catálogo ativo passa a conter os dados do Lettera. Não apague os volumes para atualizar o esquema.
+Em uma instalação nova, a migration V1 do `product-api` cria diretamente o esquema final e carrega apenas o catálogo do Lettera. As migrations de autenticação, pedidos e cotação criam seus respectivos bancos.
+
+A V1 consolidada do `product-api` pressupõe um banco vazio. Se o volume `product_data` já tiver histórico de migrations de versões anteriores do projeto, recrie os volumes antes de iniciar esta versão; o comando `down -v` apaga todos os dados persistidos e só deve ser usado quando puder descartá-los.
 
 O reset com `down -v` apaga permanentemente os dados dos volumes; use-o somente quando quiser descartar usuários, pedidos, produtos e arquivos enviados.
 

@@ -1,7 +1,22 @@
--- Preserva o histórico V1-V3 para bancos já criados pelo projeto-base.
--- V3 arquiva o catálogo anterior em tb_product_legacy; este passo recria o catálogo Lettera.
-ALTER TABLE tb_product DROP CONSTRAINT ck_product_book_count;
-TRUNCATE TABLE tb_product RESTART IDENTITY;
+CREATE TABLE tb_product (
+    id SERIAL NOT NULL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255),
+    description TEXT,
+    category VARCHAR(255) NOT NULL,
+    type VARCHAR(10) NOT NULL,
+    book_count INTEGER,
+    price NUMERIC(12, 2) NOT NULL,
+    currency VARCHAR(3) NOT NULL DEFAULT 'BRL',
+    image VARCHAR(255),
+    CONSTRAINT ck_product_type CHECK (type IN ('BOOK', 'KIT')),
+    CONSTRAINT ck_product_book_count CHECK
+        ((type = 'BOOK' AND book_count IS NULL) OR
+         (type = 'KIT' AND book_count IS NOT NULL AND book_count BETWEEN 1 AND 5)),
+    CONSTRAINT ck_product_author CHECK
+        ((type = 'BOOK' AND author IS NOT NULL AND length(trim(author)) > 0) OR
+         (type = 'KIT' AND author IS NULL))
+);
 
 INSERT INTO tb_product (title, author, description, category, type, book_count, price, currency, image) VALUES
 ('Drácula', 'Bram Stoker', 'O clássico romance gótico que acompanha a chegada do Conde Drácula à Inglaterra.', 'Terror', 'BOOK', NULL, 44.90, 'BRL', NULL),
@@ -24,8 +39,3 @@ INSERT INTO tb_product (title, author, description, category, type, book_count, 
 ('Emma', 'Jane Austen', 'Uma jovem bem-intencionada tenta organizar a vida amorosa de seus amigos.', 'Romance', 'BOOK', NULL, 39.90, 'BRL', NULL),
 ('2001: Uma Odisseia no Espaço', 'Arthur C. Clarke', 'Uma viagem espacial que explora a evolução humana e a inteligência artificial.', 'Ficção científica', 'BOOK', NULL, 49.90, 'BRL', NULL),
 ('O Código Da Vinci', 'Dan Brown', 'Um simbologista investiga pistas ocultas em uma trama de mistério.', 'Suspense', 'BOOK', NULL, 44.90, 'BRL', NULL);
-
-ALTER TABLE tb_product ADD CONSTRAINT ck_product_book_count CHECK
-    ((type = 'BOOK' AND book_count IS NULL) OR (type = 'KIT' AND book_count > 0));
-ALTER TABLE tb_product ADD CONSTRAINT ck_product_author CHECK
-    ((type = 'BOOK' AND author IS NOT NULL AND length(trim(author)) > 0) OR (type = 'KIT' AND author IS NULL));
