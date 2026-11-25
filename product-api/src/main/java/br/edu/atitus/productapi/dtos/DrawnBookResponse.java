@@ -1,3 +1,3 @@
 package br.edu.atitus.productapi.dtos;
 
-public record DrawnBookResponse(String title, String author, String image) { }
+public record DrawnBookResponse(Long id, String title, String author, String image) { }

@@ -7,6 +7,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ProductCatalogClientService {
@@ -19,7 +20,7 @@ public class ProductCatalogClientService {
 
     @Retry(name = "product-api")
     @CircuitBreaker(name = "product-api")
-    public List<DrawnBookResponse> drawKitBooks(Long id, int quantity) {
-        return productClient.drawKitBooks(id, quantity);
+    public List<DrawnBookResponse> drawKitBooks(Long id, int quantity, Set<Long> excludedBookIds) {
+        return productClient.drawKitBooks(id, quantity, excludedBookIds);
     }
 }

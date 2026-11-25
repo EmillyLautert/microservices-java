@@ -3,6 +3,7 @@ package br.edu.atitus.productapi.dtos;
 import br.edu.atitus.productapi.entities.ProductType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -15,7 +16,7 @@ public record ProductRequest(
         @Size(max = 5000) String description,
         @NotBlank @Size(max = 251) String category,
         @NotNull ProductType type,
-        @Positive @Max(50) Integer bookCount,
+        @Min(1) @Max(5) Integer bookCount,
         @NotNull @DecimalMin("0.01") BigDecimal price,
         String currency,
         @Size(max = 255) String image

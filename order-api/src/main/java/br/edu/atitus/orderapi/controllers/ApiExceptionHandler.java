@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,6 +29,12 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<String> missingParameter(MissingServletRequestParameterException ignored) {
         return ResponseEntity.badRequest().body("Parâmetro obrigatório ausente.");
+    }
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<String> missingHeader(MissingRequestHeaderException exception) {
+        if ("X-User-Id".equalsIgnoreCase(exception.getHeaderName()))
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Identidade do usuário ausente ou inválida");
+        return ResponseEntity.badRequest().body("Cabeçalho obrigatório ausente.");
     }
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<String> invalidParameter(MethodArgumentTypeMismatchException ignored) {

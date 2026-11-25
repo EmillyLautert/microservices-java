@@ -18,6 +18,8 @@ import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 @Service
 public class OrderServiceJpa implements OrderService {
@@ -37,6 +39,7 @@ public class OrderServiceJpa implements OrderService {
         order.setCreatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         order.setTotal(BigDecimal.ZERO.setScale(2));
         List<OrderItemEntity> items = new ArrayList<>();
+        Set<Long> selectedBookIds = new HashSet<>();
         BigDecimal total = BigDecimal.ZERO;
 
         for (OrderItemDTO requested : request.items()) {
@@ -54,10 +57,13 @@ public class OrderServiceJpa implements OrderService {
 
             List<DrawnBookSnapshot> drawn = List.of();
             if ("KIT".equals(product.type())) {
-                List<DrawnBookResponse> chosen = drawBooks(product.id(), requested.quantity());
+                List<DrawnBookResponse> chosen = drawBooks(product.id(), requested.quantity(), selectedBookIds);
+                chosen.stream().map(DrawnBookResponse::id).filter(java.util.Objects::nonNull).forEach(selectedBookIds::add);
                 drawn = chosen.stream().map(book -> new DrawnBookSnapshot(book.title(), book.author(), book.image())).toList();
             } else if (!"BOOK".equals(product.type())) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Tipo de produto inválido");
+            } else {
+                selectedBookIds.add(product.id());
             }
             item.setDrawnBooks(new ArrayList<>(drawn));
             items.add(item);
@@ -123,18 +129,22 @@ public class OrderServiceJpa implements OrderService {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Não foi possível consultar o catálogo");
         } catch (CallNotPermittedException exception) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catálogo temporariamente indisponível");
+        } catch (IllegalStateException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catálogo temporariamente indisponível");
         } catch (RestClientException exception) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catálogo temporariamente indisponível");
         }
     }
 
-    private List<DrawnBookResponse> drawBooks(Long productId, int quantity) {
-        try { return productClient.drawKitBooks(productId, quantity); }
+    private List<DrawnBookResponse> drawBooks(Long productId, int quantity, Set<Long> excludedBookIds) {
+        try { return productClient.drawKitBooks(productId, quantity, excludedBookIds); }
         catch (HttpStatusCodeException exception) {
             if (exception.getStatusCode().value() == 409) throw new ResponseStatusException(HttpStatus.CONFLICT, "Não há livros suficientes para montar o kit");
             if (exception.getStatusCode().value() == 404) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kit não encontrado");
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Não foi possível selecionar os livros do kit");
         } catch (CallNotPermittedException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catálogo temporariamente indisponível");
+        } catch (IllegalStateException exception) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catálogo temporariamente indisponível");
         } catch (RestClientException exception) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Catálogo temporariamente indisponível");

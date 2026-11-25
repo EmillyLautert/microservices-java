@@ -5,7 +5,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="421462a6-1e55-441a-80b7-c9c6e6794730" name="Changes" comment="Projeto Integrador">
+      <change afterPath="$PROJECT_DIR$/order-api/.dockerignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V1__CreateTableTbProduct.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V2__PopulateTableTbProduct.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V3__AdaptCatalogForLettera.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V4__RebuildCatalogForLettera.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V5__ExpandProductCategory.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V6__UseThreeBooksPerKit.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V7__ExpandProductDescription.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V8__LimitKitBookCount.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker/config/load-config.sh" beforeDir="false" afterPath="$PROJECT_DIR$/docker/config/load-config.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/order-api/dockerignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/order-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/clients/ProductClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/clients/ProductClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/controllers/ApiExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/controllers/ApiExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/DrawnBookResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/dtos/DrawnBookResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/servicesimpl/OrderServiceJpa.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/servicesimpl/OrderServiceJpa.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/servicesimpl/ProductCatalogClientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/order-api/src/main/java/br/edu/atitus/orderapi/servicesimpl/ProductCatalogClientService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/controllers/InternalKitController.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/controllers/InternalKitController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/dtos/DrawnBookResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/dtos/DrawnBookResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/dtos/ProductRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/dtos/ProductRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/repositories/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/repositories/ProductRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/services/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/services/ProductService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/AuthorizationService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/ImageStorageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/ImageStorageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/ProductServiceJpa.java" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/java/br/edu/atitus/productapi/servicesimpl/ProductServiceJpa.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/ValidationMessages.properties" beforeDir="false" afterPath="$PROJECT_DIR$/product-api/src/main/resources/ValidationMessages.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/application-es.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/application-it.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V1__CreateLetteraCatalog.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V4__ExpandProductCategory.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V5__UseThreeBooksPerKit.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V6__ExpandProductDescription.sql" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

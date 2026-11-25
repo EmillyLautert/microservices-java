@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 import java.util.List;
+import java.util.Set;
 
 @HttpExchange
 public interface ProductClient {
@@ -14,5 +15,6 @@ public interface ProductClient {
     ProductResponse getProductById(@PathVariable Long id);
 
     @GetExchange("/internal/kits/{id}/draw")
-    List<DrawnBookResponse> drawKitBooks(@PathVariable Long id, @RequestParam int quantity);
+    List<DrawnBookResponse> drawKitBooks(@PathVariable Long id, @RequestParam int quantity,
+                                         @RequestParam(required = false) Set<Long> excludedBookIds);
 }

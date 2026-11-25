@@ -226,7 +226,9 @@ docker compose -f docker/docker-compose.yml down -v --remove-orphans
 docker compose -f docker/docker-compose.yml up --build -d
 ```
 
-O projeto parte de bancos vazios: as migrations criam as tabelas e os dados iniciais na primeira inicialização.
+Em uma instalação nova, as migrations criam as tabelas e os dados iniciais. Bancos do projeto-base que já aplicaram V1–V3 são atualizados pela migration V4; o catálogo anterior é preservado em `tb_product_legacy` e o catálogo ativo passa a conter os dados do Lettera. Não apague os volumes para atualizar o esquema.
+
+O reset com `down -v` apaga permanentemente os dados dos volumes; use-o somente quando quiser descartar usuários, pedidos, produtos e arquivos enviados.
 
 ---
 
@@ -242,18 +244,19 @@ A autenticação é **stateless** com **JWT** assinado (HS256). O `auth-api` val
 | `/ws/**` | Somente vendedor (`type` 0) |
 | `/internal/**` | Sem rota no Gateway (só pela rede Docker) |
 
-Respostas de erro são em texto simples (compatível com a tela de login do app). Códigos principais: `400` dados inválidos, `401` token ausente, inválido ou credenciais incorretas, `403` perfil sem permissão, `404` recurso não encontrado, `409` conflito (e-mail já cadastrado ou livros insuficientes para o kit), `413` imagem acima do limite, `503` serviço dependente indisponível. Erros internos nunca expõem detalhes da aplicação.
+Respostas de erro são em texto simples (compatível com a tela de login do app). Códigos principais: `400` dados inválidos, `401` identidade do comprador ausente, token inválido ou credenciais incorretas, `403` perfil sem permissão, `404` recurso não encontrado, `409` conflito (e-mail já cadastrado ou livros insuficientes para o tamanho do kit ou para a compra), `413` imagem acima do limite, `503` serviço dependente indisponível. Erros internos nunca expõem detalhes da aplicação.
 
 ---
 
 ## 4. Dados iniciais e regras do kit surpresa
 
 - O catálogo inicia com **15 livros** (3 por gênero) e **5 kits**, nos gêneros Terror, Fantasia, Romance, Ficção científica e Suspense. Na carga inicial, os ids 1 a 10 e 16 a 20 são livros (ex.: 1 = *Drácula*) e os ids 11 a 15 são kits (ex.: 11 = *Kit Terror*).
-- Todo kit tem **3 livros** (`bookCount` é sempre 3) e o título é gerado como `Kit <gênero>`.
+- Cada kit contém de **1 a 5 livros**, definido por `bookCount`; os kits iniciais começam com 3. O título é gerado como `Kit <gênero>`.
 - O app envia apenas `productId` e `quantity`. O backend busca título e preço no catálogo, calcula subtotais e total com `BigDecimal`, grava o snapshot e devolve o pedido (`status` `COMPLETED`).
-- Para cada kit, o `order-api` pede ao `product-api` o sorteio de livros **distintos** do mesmo gênero (Partial Fisher-Yates). Com quantidade maior que 1, são sorteados `3 × quantidade` livros.
-- **Atenção:** o gênero precisa ter livros suficientes. Com apenas 3 livros de Terror, comprar 2 kits do gênero retorna `409`. Cadastre mais livros do gênero pelo endpoint do vendedor para permitir quantidades maiores.
-- Quantidade por item: de 1 a 50. Imagens de capa: JPEG ou PNG, até 5 MB.
+- O `product-api` sorteia livros distintos dentro de cada kit e prioriza títulos que ainda não foram escolhidos em outro item do mesmo pedido, incluindo livros comprados avulsos. Se as opções novas se esgotarem, pode reutilizar livros para completar os kits; um mesmo livro não se repete dentro do mesmo kit.
+- Para cadastrar um kit, a categoria precisa ter ao menos a quantidade de livros escolhida. Enquanto houver kits ativos, alterações e exclusões de livros não podem deixar a categoria com menos livros do que o maior kit ativo exige.
+- **Atenção:** a categoria precisa ter livros suficientes para o tamanho do kit multiplicado pela quantidade comprada. Por exemplo, comprar 2 kits de 3 livros de Terror exige 6 livros distintos disponíveis; caso contrário, retorna `409`.
+- Quantidade por item: de 1 a 50. Kits: de 1 a 5 livros. Imagens de capa: JPG/JPEG, PNG ou WebP, até 5 MB.
 
 ---
 
@@ -265,7 +268,7 @@ Todas as chamadas passam pelo Gateway (`http://localhost:8080`). Os exemplos usa
 | --- | --- | --- | --- |
 | `POST` | `/auth/signup` | Público | Cadastra um comprador |
 | `POST` | `/auth/signin` | Público | Autentica e emite o JWT |
-| `GET` | `/products` | Público | Lista o catálogo (`category`, `type`, `search`, `page`, `size`) |
+| `GET` | `/products` | Público | Lista o catálogo (`category`, `type`, `search`, `page`, `size`); busca e gênero ignoram acentos e maiúsculas/minúsculas |
 | `GET` | `/products/{id}` | Público | Detalhes de um livro ou kit |
 | `GET` | `/categories` | Público | Lista os gêneros existentes |
 | `GET` | `/images/{arquivo}` | Público | Obtém a capa de um produto |
@@ -344,11 +347,11 @@ curl -i -X POST $BASE/ws/products \
   -d '{"title":"Carrie","author":"Stephen King","description":"Uma jovem com poderes telecinéticos.","category":"Terror","type":"BOOK","price":39.90,"currency":"BRL"}'
 ```
 
-**Cadastrar kit** — `201 Created`. O título é gerado (`Kit <gênero>`) e `bookCount` é sempre 3.
+**Cadastrar kit** — `201 Created`. O título é gerado (`Kit <gênero>`); informe `bookCount` entre 1 e 5 e a categoria precisa ter pelo menos essa quantidade de livros.
 ```bash
 curl -i -X POST $BASE/ws/products \
   -H "Authorization: Bearer $SELLER_TOKEN" -H 'Content-Type: application/json' \
-  -d '{"description":"Três livros escolhidos de forma surpresa.","category":"Terror","type":"KIT","price":69.90,"currency":"BRL"}'
+  -d '{"description":"Livros escolhidos de forma surpresa.","category":"Terror","type":"KIT","bookCount":3,"price":69.90,"currency":"BRL"}'
 ```
 
 **Atualizar produto** (o PUT exige todos os campos) — `200 OK`; `404` se não existir. Use o `id` devolvido no cadastro.
@@ -359,11 +362,11 @@ curl -i -X PUT $BASE/ws/products/$PRODUCT_ID \
   -d '{"title":"Carrie","author":"Stephen King","description":"Edição revisada.","category":"Terror","type":"BOOK","price":34.90,"currency":"BRL"}'
 ```
 
-**Enviar capa** — `200 OK` com o caminho da imagem; `400` para formato que não seja JPEG/PNG; `413` acima de 5 MB.
+**Enviar capa** — `200 OK` com o caminho da imagem; `400` para formato que não seja JPG/JPEG, PNG ou WebP; `413` acima de 5 MB.
 ```bash
 curl -i -X POST $BASE/ws/products/$PRODUCT_ID/image \
   -H "Authorization: Bearer $SELLER_TOKEN" \
-  -F 'file=@capa.jpg;type=image/jpeg'
+  -F 'file=@capa.webp;type=image/webp'
 ```
 
 **Remover produto** — `204 No Content`; `404` se não existir.
@@ -456,7 +459,7 @@ curl -i $BASE/orders/me -H "Authorization: Bearer $BUYER_TOKEN"
 docker compose -f docker/docker-compose.yml start product-api
 ```
 
-As primeiras compras demoram mais (tentativas e timeout) e retornam `503`; depois que o Circuit Breaker abre, as falhas passam a ser imediatas.
+As primeiras compras podem demorar enquanto o cliente tenta localizar e acessar o catálogo e retornam `503`. Depois que o Circuit Breaker abre, a exceção de chamada recusada não é repetida pelo Retry e as falhas retornam imediatamente. Se o catálogo sair do Consul, a ausência de instâncias também é convertida em `503`.
 
 ### 6.6 Persistência
 
@@ -481,7 +484,7 @@ Sem `-v`, usuários, pedidos, produtos e imagens continuam disponíveis.
 9. **Resiliência.** Retry e Circuit Breaker externalizados no Consul; timeouts definidos nos clientes HTTP. Erros 4xx do catálogo não são repetidos nem contam para abrir o circuito. Falhas de dependência viram `503` com mensagem controlada.
 10. **Observabilidade.** O Prometheus usa alvos estáticos pelo DNS do Compose (sem service discovery do Consul) por simplicidade. A amostragem de traces é de 100%, adequada para demonstração; em produção, use uma taxa menor. O Alloy lê os logs pelo socket do Docker.
 11. **Respostas de erro em texto simples**, para serem exibidas diretamente pela tela de autenticação do aplicativo.
-12. **Kits.** O número de livros do kit é fixo em 3 e o título é gerado a partir do gênero. As capas ficam no volume `product_images` e são servidas publicamente pelo `product-api`.
+12. **Kits.** Cada kit contém de 1 a 5 livros, definidos por `bookCount`, e o título é gerado a partir do gênero. As capas JPG/JPEG, PNG e WebP ficam no volume `product_images` e são servidas publicamente pelo `product-api`.
 
 ---
 

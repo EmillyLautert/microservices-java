@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.Set;
 import java.util.List;
 
 @RestController
@@ -16,8 +17,9 @@ public class InternalKitController {
     public InternalKitController(ProductService service) { this.service = service; }
 
     @GetMapping("/{kitId}/draw")
-    public List<DrawnBookResponse> draw(@PathVariable Long kitId, @RequestParam int quantity) {
-        return service.findKitBooks(kitId, quantity).stream()
-                .map(book -> new DrawnBookResponse(book.getTitle(), book.getAuthor(), book.getImage())).toList();
+    public List<DrawnBookResponse> draw(@PathVariable Long kitId, @RequestParam int quantity,
+                                        @RequestParam(required = false) Set<Long> excludedBookIds) {
+        return service.findKitBooks(kitId, quantity, excludedBookIds).stream()
+                .map(book -> new DrawnBookResponse(book.getId(), book.getTitle(), book.getAuthor(), book.getImage())).toList();
     }
 }

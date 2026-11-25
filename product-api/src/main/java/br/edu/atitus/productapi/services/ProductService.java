@@ -7,6 +7,7 @@ import br.edu.atitus.productapi.entities.ProductType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Set;
 
 public interface ProductService {
     Page<ProductResponse> findAll(String category, ProductType type, String search, Pageable pageable);
@@ -16,5 +17,5 @@ public interface ProductService {
     ProductResponse update(Long id, ProductRequest request);
     ProductResponse updateImage(Long id, String imagePath);
     void delete(Long id);
-    List<ProductEntity> findKitBooks(Long kitId, int quantity);
+    List<ProductEntity> findKitBooks(Long kitId, int quantity, Set<Long> excludedBookIds);
 }

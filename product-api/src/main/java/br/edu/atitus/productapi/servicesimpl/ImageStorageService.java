@@ -15,7 +15,8 @@ import java.util.UUID;
 @Service
 public class ImageStorageService {
     private static final Map<String, String> ALLOWED_TYPES = Map.of(
-            "image/jpeg", ".jpg", "image/png", ".png");
+            "image/jpeg", ".jpg", "image/jpg", ".jpg",
+            "image/png", ".png", "image/webp", ".webp");
     private static final long MAX_IMAGE_SIZE = 5L * 1024 * 1024;
 
     @Value("${app.images.location:/data/images}")
@@ -26,7 +27,8 @@ public class ImageStorageService {
         if (file.getSize() > MAX_IMAGE_SIZE)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A imagem deve ter no máximo 5 MB");
         String extension = ALLOWED_TYPES.get(file.getContentType());
-        if (extension == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Formato de imagem não suportado; use JPEG ou PNG");
+        if (extension == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Formato de imagem não suportado; use JPG, JPEG, PNG ou WebP");
         try {
             Path directory = Paths.get(imageLocation).toAbsolutePath().normalize();
             Files.createDirectories(directory);
