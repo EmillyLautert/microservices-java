@@ -18,7 +18,7 @@ public class CurrencyController {
     public CurrencyController(CurrencyService service) { this.service = service; }
 
     @GetMapping
-    public ResponseEntity<CurrencyResponse> getCurrency(@RequestParam String source, @RequestParam String target) throws Exception {
+    public ResponseEntity<CurrencyResponse> getCurrency(@RequestParam String source, @RequestParam String target) {
         String normalizedSource = normalizeCurrency(source, "source");
         String normalizedTarget = normalizeCurrency(target, "target");
         return ResponseEntity.ok(service.findBySourceCurrencyAndTargetCurrency(normalizedSource, normalizedTarget));

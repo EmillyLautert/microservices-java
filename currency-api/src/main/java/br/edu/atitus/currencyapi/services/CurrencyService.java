@@ -6,5 +6,5 @@ public interface CurrencyService {
     CurrencyResponse findBySourceCurrencyAndTargetCurrency(
             String sourceCurrency,
             String targetCurrency
-    ) throws Exception;
+    );
 }

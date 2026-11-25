@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import java.util.NoSuchElementException;
 
 @Service
 public class CurrencyServiceJpa implements CurrencyService {
@@ -25,7 +27,7 @@ public class CurrencyServiceJpa implements CurrencyService {
     }
 
     @Override
-    public CurrencyResponse findBySourceCurrencyAndTargetCurrency(String sourceCurrency, String targetCurrency) throws Exception {
+    public CurrencyResponse findBySourceCurrencyAndTargetCurrency(String sourceCurrency, String targetCurrency) {
         String environment = "Currency API running in port " + serverPort;
         if (sourceCurrency.equalsIgnoreCase(targetCurrency)) {
             return new CurrencyResponse(sourceCurrency, targetCurrency, 1.0, environment + " (same currencies)");
@@ -35,7 +37,7 @@ public class CurrencyServiceJpa implements CurrencyService {
             Double sourceRefBrl = sourceCurrency.equalsIgnoreCase("BRL") ? 1 : bcbClientService.getConversionRate(sourceCurrency);
             Double targetRefBrl = targetCurrency.equalsIgnoreCase("BRL") ? 1 : bcbClientService.getConversionRate(targetCurrency);
             return new CurrencyResponse(sourceCurrency, targetCurrency, sourceRefBrl/targetRefBrl, environment + " (currencies in BCB)");
-        } catch (Exception e) {
+        } catch (RestClientException | NoSuchElementException exception) {
             logger.warn("BCB indisponível para {} -> {}; tentando a cotação local", sourceCurrency, targetCurrency);
             var currency =  repository.findBySourceCurrencyAndTargetCurrency(sourceCurrency.toUpperCase(), targetCurrency.toUpperCase())
                     .orElseThrow(() -> new EntityNotFoundException("Cotação não encontrada"));

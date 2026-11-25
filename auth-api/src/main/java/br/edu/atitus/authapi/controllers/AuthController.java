@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +24,12 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/auth")
 public class AuthController {
     private final UserService userService;
-    private final AuthenticationConfiguration authConfig;
+    private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    public AuthController(UserService userService, AuthenticationConfiguration authConfig, JwtUtil jwtUtil) {
+    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
         this.userService = userService;
-        this.authConfig = authConfig;
+        this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
 
@@ -44,17 +43,16 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserResponseDto> signup(@Valid @RequestBody SignupRequestDto dto) throws Exception {
+    public ResponseEntity<UserResponseDto> signup(@Valid @RequestBody SignupRequestDto dto) {
         UserEntity user = convertDTO2Entity(dto);
         user.setType(UserType.Common);
         return ResponseEntity.status(HttpStatus.CREATED).body(UserResponseDto.fromEntity(userService.save(user)));
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<SigninResponseDto> signin(@Valid @RequestBody SigninRequestDto signin) throws Exception {
-        AuthenticationManager manager = authConfig.getAuthenticationManager();
+    public ResponseEntity<SigninResponseDto> signin(@Valid @RequestBody SigninRequestDto signin) {
         String email = signin.email().trim().toLowerCase();
-        manager.authenticate(new UsernamePasswordAuthenticationToken(email, signin.password()));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, signin.password()));
         UserEntity user = (UserEntity) userService.loadUserByUsername(email);
         return ResponseEntity.ok(new SigninResponseDto(UserResponseDto.fromEntity(user), jwtUtil.generateToken(user)));
     }

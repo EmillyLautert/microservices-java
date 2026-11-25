@@ -18,6 +18,8 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class AuthFilter implements GlobalFilter, Ordered {
     private static final List<String> IDENTITY_HEADERS = List.of("X-User-Id", "X-User-Type", "X-User-Email");
+    private static final int SELLER_TYPE_CODE = 0;
+    private static final int BUYER_TYPE_CODE = 1;
     private final JwtUtil jwtUtil;
     public AuthFilter(JwtUtil jwtUtil) { this.jwtUtil = jwtUtil; }
 
@@ -41,7 +43,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         boolean sellerRoute = path.startsWith("/ws/");
         int userType = type.intValue();
-        if ((sellerRoute && userType != 0) || (!sellerRoute && userType != 1))
+        if ((sellerRoute && userType != SELLER_TYPE_CODE) || (!sellerRoute && userType != BUYER_TYPE_CODE))
             return reject(exchange, HttpStatus.FORBIDDEN);
 
         ServerHttpRequest authenticated = sanitized.mutate().headers(headers -> {

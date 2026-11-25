@@ -25,14 +25,18 @@ import java.util.HashSet;
 public class OrderServiceJpa implements OrderService {
     private final OrderRepository orderRepository;
     private final ProductCatalogClientService productClient;
+    private final OrderPersistenceService orderPersistenceService;
+    private final OrderDetailsMapper orderDetailsMapper;
 
-    public OrderServiceJpa(OrderRepository orderRepository, ProductCatalogClientService productClient) {
+    public OrderServiceJpa(OrderRepository orderRepository, ProductCatalogClientService productClient,
+                           OrderPersistenceService orderPersistenceService, OrderDetailsMapper orderDetailsMapper) {
         this.orderRepository = orderRepository;
         this.productClient = productClient;
+        this.orderPersistenceService = orderPersistenceService;
+        this.orderDetailsMapper = orderDetailsMapper;
     }
 
     @Override
-    @Transactional
     public OrderDetails createOrder(OrderDTO request, Long customerId) {
         OrderEntity order = new OrderEntity();
         order.setCustomerId(customerId);
@@ -67,11 +71,11 @@ public class OrderServiceJpa implements OrderService {
             }
             item.setDrawnBooks(new ArrayList<>(drawn));
             items.add(item);
-            total = total.add(subtotal(item));
+            total = total.add(orderDetailsMapper.subtotal(item));
         }
         order.setItems(items);
         order.setTotal(total.setScale(2, RoundingMode.HALF_UP));
-        return toDetails(orderRepository.save(order));
+        return orderPersistenceService.save(order);
     }
 
     @Override
@@ -88,7 +92,7 @@ public class OrderServiceJpa implements OrderService {
     public OrderDetails findMyOrder(Long id, Long customerId) {
         OrderEntity order = orderRepository.findByIdAndCustomerId(id, customerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado"));
-        return toDetails(order);
+        return orderDetailsMapper.fromEntity(order);
     }
 
     @Override
@@ -111,7 +115,7 @@ public class OrderServiceJpa implements OrderService {
             if (matchingItems.isEmpty()) continue;
 
             List<SaleLine> lines = matchingItems.stream()
-                    .map(item -> new SaleLine(item.getTitle(), item.getType(), item.getQuantity(), subtotal(item)))
+                    .map(item -> new SaleLine(item.getTitle(), item.getType(), item.getQuantity(), orderDetailsMapper.subtotal(item)))
                     .toList();
             BigDecimal orderTotal = lines.stream().map(SaleLine::total).reduce(BigDecimal.ZERO, BigDecimal::add);
             itemsSold += matchingItems.stream().mapToInt(OrderItemEntity::getQuantity).sum();
@@ -151,15 +155,4 @@ public class OrderServiceJpa implements OrderService {
         }
     }
 
-    private BigDecimal subtotal(OrderItemEntity item) {
-        return item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())).setScale(2, RoundingMode.HALF_UP);
-    }
-
-    private OrderDetails toDetails(OrderEntity order) {
-        List<OrderItemView> items = order.getItems().stream().map(item -> new OrderItemView(
-                item.getProductId(), item.getTitle(), item.getType(), item.getUnitPrice(), item.getQuantity(), subtotal(item),
-                item.getDrawnBooks().stream().map(book -> new DrawnBookView(book.getTitle(), book.getAuthor(), book.getImage())).toList()
-        )).toList();
-        return new OrderDetails(order.getId(), order.getCreatedAt(), "COMPLETED", order.getTotal(), items);
-    }
 }

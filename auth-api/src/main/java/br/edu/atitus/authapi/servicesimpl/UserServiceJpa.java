@@ -24,7 +24,7 @@ public class UserServiceJpa implements UserService {
         this.encoder = encoder;
     }
 
-    private void validate(UserEntity user) throws Exception {
+    private void validate(UserEntity user) {
         if (user.getName() == null || user.getName().isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome obrigatório");
         if (user.getEmail() == null || user.getEmail().isBlank() || !Validator.validateEmail(user.getEmail()))
@@ -53,14 +53,14 @@ public class UserServiceJpa implements UserService {
         }
     }
 
-    private void format(UserEntity user) throws Exception {
+    private void format(UserEntity user) {
         user.setPassword(encoder.encode(user.getPassword()));
     }
 
     @Override
-    public UserEntity save(UserEntity user) throws Exception {
+    public UserEntity save(UserEntity user) {
         if (user == null)
-            throw new Exception("Objeto nulo");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário obrigatório");
         validate(user);
         format(user);
         return userRepository.save(user);

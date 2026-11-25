@@ -24,7 +24,7 @@ public class JwtUtil {
     public String generateToken(UserEntity user) {
         Date now = new Date();
         return Jwts.builder().claim("id", user.getId()).claim("email", user.getEmail())
-                .claim("type", user.getType().ordinal()).issuedAt(now)
+                .claim("type", user.getType().getCode()).issuedAt(now)
                 .expiration(new Date(now.getTime() + EXPIRATION_MILLIS))
                 .signWith(signingKey, Jwts.SIG.HS256).compact();
     }
