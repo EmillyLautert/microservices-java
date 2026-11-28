@@ -5,15 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="421462a6-1e55-441a-80b7-c9c6e6794730" name="Changes" comment="Projeto Integrador">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V1__CreateTableTbProduct.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V2__PopulateTableTbProduct.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V3__AdaptCatalogForLettera.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V4__RebuildCatalogForLettera.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V5__ExpandProductCategory.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V6__UseThreeBooksPerKit.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V7__ExpandProductDescription.sql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/product-api/src/main/resources/db/migration/V8__LimitKitBookCount.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
